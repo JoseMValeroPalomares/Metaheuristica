@@ -1,9 +1,9 @@
-package model;
+package models;
 
 public class City {
-    int id;
-    double x;
-    double y;
+    public int id;
+    public double x;
+    public double y;
 
     public City(int id, double x, double y) {
         this.id = id;
@@ -11,7 +11,6 @@ public class City {
         this.y = y;
     }
 
-    // Metodo util para poder imprimir una ciudad facilmente con println
     @Override
     public String toString() {
         return "Ciudad " + id + " -> (x=" + x + ", y=" + y + ")";

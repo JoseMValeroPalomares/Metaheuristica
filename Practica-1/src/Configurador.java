@@ -1,5 +1,5 @@
 
-import model.City;
+import models.City;
 import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -22,6 +22,7 @@ public class Configurador {
         type = new ArrayList<String>();
         dimension = new ArrayList<Long>();
         ewt = new ArrayList<String>();
+        cities = new ArrayList<City>();
         
         // Leer archivo de configuracion
         String line;
@@ -58,7 +59,8 @@ public class Configurador {
                     }
 
                 } else {
-                    if (line.trim().equals("EOF")) {
+                    line = line.trim();
+                    if (line.equals("EOF")) {
                         break;
                         
                     } else {
