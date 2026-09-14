@@ -26,5 +26,3 @@ public class Main {
         
     }
 }
-
-// Main mayus :)

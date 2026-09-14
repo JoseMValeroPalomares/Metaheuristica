@@ -5,7 +5,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-
+// Rehacer configurador para que este lea el config.txt (1er video) y luego ya leemos los datos de cada archivo (2do video)
 public class Configurador {
     ArrayList<String> name;
     ArrayList<String> comment;
@@ -13,7 +13,7 @@ public class Configurador {
     ArrayList<Long> dimension;
     ArrayList<String> ewt; // edge weight type
     ArrayList<City> cities;
-    double[][] distanceMatrix;
+    public double[][] distanceMatrix;
 
     
     public Configurador(String rute) {
