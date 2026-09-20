@@ -1,3 +1,2 @@
-files=a280.tsp ch130.tsp d18512.tsp pr144.tsp u1060.tsp
+files=Practica-1/config-files/a280.tsp Practica-1/config-files/ch130.tsp Practica-1/config-files/d18512.tsp Practica-1/config-files/pr144.tsp Practica-1/config-files/u1060.tsp
 algorithms=greedy random_greedy
-seeds=
