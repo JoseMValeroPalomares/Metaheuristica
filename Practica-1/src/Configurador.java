@@ -7,6 +7,55 @@ import java.io.IOException;
 
 // Rehacer configurador para que este lea el config.txt (1er video) y luego ya leemos los datos de cada archivo (2do video)
 public class Configurador {
+
+    ArrayList<String> files;
+    ArrayList<String> algorithms;
+    ArrayList<Long> seeds;
+
+    public Configurador(String rute) {
+        files = new ArrayList<>();
+        algorithms = new ArrayList<>();
+        seeds = new ArrayList<>();
+        String line;
+        FileReader f = null;
+
+        try {
+            f = new FileReader(rute);
+            BufferedReader b = new BufferedReader(f);
+            while ((line = b.readLine()) != null) {
+                String[] split = line.split("=");
+                switch(split[0]) {
+                    case "files":
+                        String[] v = split[1].split(" ");
+                        for (int i = 0; i < v.length; i++) {
+                            files.add(v[i]);
+                        }
+                        break;
+                    
+                    case "algorithms":
+                        String[] valg = split[1].split(" ");
+                        for (int i = 0; i < valg.length; i++) {
+                            algorithms.add(valg[i]);
+                        }
+                        break;
+                    
+                    case "seeds":
+                        String[] vseeds = split[1].split(" ");
+                        for (int i = 0; i < vseeds.length; i++) {
+                            seeds.add(Long.parseLong(vseeds[i]));
+                        }
+                        break;
+                }
+            }
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+    }
+
+
+
+
+    /*
     ArrayList<String> name;
     ArrayList<String> comment;
     ArrayList<String> type;
@@ -81,8 +130,13 @@ public class Configurador {
         } catch (IOException e) {
             System.out.println(e);
         }
+    }*/
+
+    public ArrayList<String> getFiles() {
+        return files;
     }
 
+    /*
     public void calcDistanceMatrix() {
         int n = cities.size();
         distanceMatrix = new double[n][n];
@@ -94,6 +148,6 @@ public class Configurador {
                 distanceMatrix[i][j] = Math.sqrt(Math.pow(c1.x - c2.x, 2) + Math.pow(c1.y - c2.y, 2));
             }
         }
-    }
+    }*/
 
 } 

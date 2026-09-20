@@ -2,8 +2,10 @@ import models.City;
 
 public class Main {
     public static void main(String[] args) {
-        Configurador configurador = new Configurador("Practica-1/config-files/ch130.tsp");
+        Configurador configurador = new Configurador("Practica-1/config-files/config.txt");
+        System.out.println(configurador.getFiles());
 
+        /* 
         System.out.println("Nombre: " + configurador.name);
         System.out.println("Dimension: " + configurador.dimension);
         System.out.println("Tipo de peso: " + configurador.ewt);
@@ -22,7 +24,7 @@ public class Main {
                 System.out.printf("%.2f ", configurador.distanceMatrix[i][j]);
             }
             System.out.println();
-        }
+        }*/
         
     }
 }
