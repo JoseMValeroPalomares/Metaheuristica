@@ -1,5 +1,4 @@
 
-import models.City;
 import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -57,6 +56,15 @@ public class Configurador {
 
     public ArrayList<String> getFiles() {
         return files;
+    }
+
+
+    public ArrayList<String> getAlgorithms() {
+        return algorithms;
+    }
+
+    public ArrayList<Long> getSeeds() {
+        return seeds;
     }
 
 

@@ -1,2 +1,3 @@
 files=Practica-1/config-files/a280.tsp Practica-1/config-files/ch130.tsp Practica-1/config-files/d18512.tsp Practica-1/config-files/pr144.tsp Practica-1/config-files/u1060.tsp
 algorithms=greedy random_greedy
+seeds=12345678 23456781 34567812
