@@ -5,51 +5,27 @@ import java.util.Comparator;
 import models.pairVector;
 import java.util.Random;
 
-public class randomGreedy {
-    
-    double[][] matrix;
-    int n; // longitud
-    ArrayList<pairVector> sumCities;
-    int initialCity;
-    ArrayList<Integer> greedyRute; // solucion
-    long seed;
-    static int K = 5;
+public class randomGreedy extends greedy {
+
+    private long seed;
+    private static int K = 5;
 
     public randomGreedy(double[][] matrix, long seed) {
-        this.matrix = matrix;
-        this.n = matrix.length;
-        this.sumCities = new ArrayList<>();
-        this.greedyRute = new ArrayList<>();
+        super(matrix, false); // Llamar al constructor del padre.
         this.seed = seed;
+        executeGreedy();
+    }
 
-        sumDistances();
 
-        sortVector();
-
+    @Override 
+    protected void executeGreedy() {
+        // Inicializacion numero random
         Random rand = new Random(this.seed);
         int limitK = Math.min(K, n);
         int randomNum = rand.nextInt(limitK);
+
         this.initialCity = sumCities.get(randomNum).getId();
-        
-        executeGreedy(rand);
-    }
 
-
-    private void sumDistances() {
-        for (int i = 0; i < n; i++) {
-            double total = 0;
-            for (int j = 0; j < n; j++) {
-                total += matrix[i][j];
-            }
-            sumCities.add(new pairVector(i, total));
-        }
-    }
-
-    private void sortVector() {
-        sumCities.sort(Comparator.comparingDouble(p -> p.getSum_distance()));
-    }
-
-    private void executeGreedy(Random rand) {
         boolean[] visited = new boolean[n];
 
         int currentNode = this.initialCity;
@@ -88,28 +64,4 @@ public class randomGreedy {
         }
     }
 
-    public ArrayList<Integer> getRute() {
-        return greedyRute;
-    }
-
-    public double getCost() {
-        double cost = 0.0;
-        int n = greedyRute.size();
-
-        for (int i = 0; i < n - 1; i++) {
-            int actualCity = greedyRute.get(i);
-            int nextCity = greedyRute.get(i + 1);
-            cost += matrix[actualCity][nextCity];
-        }
-    
-        if (n > 0) {
-            int lastCity = greedyRute.get(n - 1);
-            int firstCity = greedyRute.get(0);
-            cost += matrix[lastCity][firstCity];
-        }
-
-        cost = Math.round(cost * 100.0) / 100.0;
-
-        return cost;
-    }
 }

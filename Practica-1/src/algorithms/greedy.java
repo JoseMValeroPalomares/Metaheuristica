@@ -7,13 +7,17 @@ import models.pairVector;
 
 public class greedy {
     
-    double[][] matrix;
-    int n; // longitud
-    ArrayList<pairVector> sumCities;
-    int initialCity;
-    ArrayList<Integer> greedyRute; // solucion
+    protected double[][] matrix;
+    protected int n; // longitud
+    protected ArrayList<pairVector> sumCities;
+    protected int initialCity;
+    protected ArrayList<Integer> greedyRute; // solucion
 
     public greedy(double[][] matrix) {
+        this(matrix, true);
+    }
+
+    public greedy(double[][] matrix, boolean runExecution) {
         this.matrix = matrix;
         this.n = matrix.length;
         this.sumCities = new ArrayList<>();
@@ -22,14 +26,14 @@ public class greedy {
         sumDistances();
 
         sortVector();
-
-        this.initialCity = sumCities.get(0).getId();
         
-        executeGreedy();
+        if (runExecution) { // Se ejecuta si el que lo ha llamado es "new greedy(matrix)", es decir, si no lo ha llamado randomGreedy.java
+            executeGreedy();
+        }
     }
 
 
-    private void sumDistances() {
+    protected void sumDistances() {
         for (int i = 0; i < n; i++) {
             double total = 0;
             for (int j = 0; j < n; j++) {
@@ -39,11 +43,13 @@ public class greedy {
         }
     }
 
-    private void sortVector() {
+    protected void sortVector() {
         sumCities.sort(Comparator.comparingDouble(p -> p.getSum_distance()));
     }
 
-    private void executeGreedy() {
+    protected void executeGreedy() {
+        this.initialCity = sumCities.get(0).getId();
+
         boolean[] visited = new boolean[n];
 
         int currentNode = this.initialCity;
