@@ -3,29 +3,35 @@ package algorithms;
 import java.util.ArrayList;
 import java.util.Comparator;
 import models.pairVector;
+import java.util.Random;
 
-
-public class greedy {
+public class randomGreedy {
     
     double[][] matrix;
     int n; // longitud
     ArrayList<pairVector> sumCities;
     int initialCity;
     ArrayList<Integer> greedyRute; // solucion
+    long seed;
+    static int K = 5;
 
-    public greedy(double[][] matrix) {
+    public randomGreedy(double[][] matrix, long seed) {
         this.matrix = matrix;
         this.n = matrix.length;
         this.sumCities = new ArrayList<>();
         this.greedyRute = new ArrayList<>();
+        this.seed = seed;
 
         sumDistances();
 
         sortVector();
 
-        this.initialCity = sumCities.get(0).getId();
+        Random rand = new Random(this.seed);
+        int limitK = Math.min(K, n);
+        int randomNum = rand.nextInt(limitK);
+        this.initialCity = sumCities.get(randomNum).getId();
         
-        executeGreedy();
+        executeGreedy(rand);
     }
 
 
@@ -43,7 +49,7 @@ public class greedy {
         sumCities.sort(Comparator.comparingDouble(p -> p.getSum_distance()));
     }
 
-    private void executeGreedy() {
+    private void executeGreedy(Random rand) {
         boolean[] visited = new boolean[n];
 
         int currentNode = this.initialCity;
@@ -51,23 +57,33 @@ public class greedy {
         greedyRute.add(currentNode);
 
         for (int step = 1; step < n; step++) {
-            int nextCity = -1;
-            double minDist = 87896789;
 
-            for (int candidate = 0; candidate < n; candidate++) {
-                if (!visited[candidate] && matrix[currentNode][candidate] < minDist) {
-                    minDist = matrix[currentNode][candidate];
-                    nextCity = candidate;
+            ArrayList<pairVector> candidates = new ArrayList<>();
+            for (int j = 0; j < n; j++) {
+                if (!visited[j]) {
+                    double dist = matrix[currentNode][j];
+                
+                    if (candidates.size() < K) {
+                        candidates.add(new pairVector(j, dist));
+                        candidates.sort(Comparator.comparingDouble(p -> p.getSum_distance()));
+                    } 
+                    
+                    else if (dist < candidates.get(K - 1).getSum_distance()) {
+                        candidates.remove(K - 1);
+                        candidates.add(new pairVector(j, dist));
+                        candidates.sort(Comparator.comparingDouble(p -> p.getSum_distance()));
+                    }
                 }
             }
 
+            if (candidates.isEmpty()) break;
 
-            if (nextCity != -1) {
-                visited[nextCity] = true;
-                currentNode = nextCity;
-                greedyRute.add(currentNode);
-
-            }
+            int kActual = Math.min(K, candidates.size());
+            int randomIndex = rand.nextInt(kActual);
+        
+            int nextCity = candidates.get(randomIndex).getId();
+            visited[nextCity] = true;
+            greedyRute.add(nextCity);
 
         }
     }

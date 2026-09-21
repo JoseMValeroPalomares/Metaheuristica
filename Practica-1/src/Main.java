@@ -1,4 +1,5 @@
 import algorithms.greedy;
+import algorithms.randomGreedy;
 
 public class Main {
     public static void main(String[] args) {
@@ -39,10 +40,24 @@ public class Main {
                         System.out.println("Tiempo: " + formatedTime + " ms");
                         break;
                         
-                    // poner greedy aleatorio
+                    case "random_greedy":
+                        for (int s = 0; s < configurator.getSeeds().size(); s++) {
+                            System.out.println("\n--- Ejecutando semilla: " + s + " ---");
+                            startTimer = System.nanoTime();
+
+                            randomGreedy solverRandomGreedy = new randomGreedy(distanceMatrix, configurator.getSeeds().get(s));
+
+                            endTimer = System.nanoTime();
+
+                            timeNs = endTimer - startTimer;
+                            timeMs = timeNs / 1_000_000.0;
+                            
+                            formatedTime = String.format(java.util.Locale.US, "%.4f", timeMs);
                         
-                    default:
-                        System.out.println("Algoritmo desconocido: " + actualAlgorithm);
+
+                            System.out.println("Coste: " + solverRandomGreedy.getCost());
+                            System.out.println("Tiempo: " + formatedTime + " ms");
+                        }
                         break;
                 }
             }
