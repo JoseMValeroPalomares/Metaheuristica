@@ -27,14 +27,13 @@ public class greedy {
 
         sortVector();
         
-        for (int indice : greedyRute) {
-            greedyRute.add(sumCities.get(0).getId());
-        }
-
-        /*
+        
         if (runExecution) { // Se ejecuta si el que lo ha llamado es "new greedy(matrix)", es decir, si no lo ha llamado randomGreedy.java
+            for (int indice : greedyRute) {
+            greedyRute.add(sumCities.get(0).getId());
+            }
             executeGreedy();
-        }*/
+        }
     }
         
 
