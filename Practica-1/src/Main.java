@@ -1,5 +1,7 @@
+
 import algorithms.greedy;
 import algorithms.randomGreedy;
+import algorithms.localSearch;
 
 public class Main {
     public static void main(String[] args) {
@@ -59,6 +61,29 @@ public class Main {
                             System.out.println("Tiempo: " + formatedTime + " ms");
                         }
                         break;
+
+                    case "local_search":
+                        for (int s = 0; s < configurator.getSeeds().size(); s++) {
+                            System.out.println("\n--- Ejecutando semilla: " + s + " ---");
+                            startTimer = System.nanoTime();
+
+                            randomGreedy initial = new randomGreedy(distanceMatrix, configurator.getSeeds().get(s));
+
+                            localSearch solverLS = new localSearch(initial.getRute(), distanceMatrix);
+
+                            endTimer = System.nanoTime();
+
+                            timeNs = endTimer - startTimer;
+                            timeMs = timeNs / 1_000_000.0;
+                            formatedTime = String.format(java.util.Locale.US, "%.4f", timeMs);
+
+                            System.out.println("Coste inicial (greedy aleatorio): " + initial.getCost());
+                            System.out.println("Coste final (busqueda local): " + solverLS.getCost());
+                            System.out.println("Iteraciones: " + solverLS.getIterations());
+                            System.out.println("Tiempo: " + formatedTime + " ms");
+                        }
+                        break;
+
                 }
             }
         }

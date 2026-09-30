@@ -29,10 +29,10 @@ public class greedy {
         
         
         if (runExecution) { // Se ejecuta si el que lo ha llamado es "new greedy(matrix)", es decir, si no lo ha llamado randomGreedy.java
-            for (int indice : greedyRute) {
-            greedyRute.add(sumCities.get(0).getId());
+            for (pairVector indice : sumCities) {
+                greedyRute.add(indice.getId());
             }
-            executeGreedy();
+            //executeGreedy();
         }
     }
         
@@ -63,7 +63,7 @@ public class greedy {
 
         for (int step = 1; step < n; step++) {
             int nextCity = -1;
-            double minDist = 87896789;
+            double minDist = Double.MAX_VALUE;
 
             for (int candidate = 0; candidate < n; candidate++) {
                 if (!visited[candidate] && matrix[currentNode][candidate] < minDist) {

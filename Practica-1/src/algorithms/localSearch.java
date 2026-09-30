@@ -2,100 +2,89 @@
 package algorithms;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class localSearch {
+    private static final int MAX_ITERATIONS = 10000;
+
+    protected int iterations;
     protected int[] mask;
     protected int n;
-    protected boolean global_improvement;
     protected ArrayList<Integer> solution;
     protected double[][] matrix;
+    protected double currentCost;
 
     public localSearch(ArrayList<Integer> solution, double[][] matrix) {
         this.n = solution.size();
         this.mask = new int[n]; 
-        this.global_improvement = true;
-        this.solution = solution;
+        this.solution = new ArrayList<>(solution);
         this.matrix = matrix;
-
+        this.iterations = 0;
+        this.currentCost = calculateCost(this.solution);
 
         search();
-
     }
 
 
     public void search() {
-        double currentCost = calculateCost(solution);
         int index = 0;
+        int noImprovement = 0; // posiciones consecutivas sin mejora
 
-        while (global_improvement) {
-            global_improvement = false;
-            int unsuccessful_attempts = 0;
+        while (noImprovement < n && iterations < MAX_ITERATIONS) { // si noImprovement >= n, todo mask es 1 (no mejora)
 
-            while (unsuccessful_attempts < n) {
-                if (mask[index] == 0) {
-                    boolean improved_here = false;
-
-                    for (int offset = 2; offset < n; offset++) {
-                        int j = (index + offset) % n;
-
-                        ArrayList<Integer> neighbor = apply2opt(solution, index, j);
-                        double neighborCost = calculateCost(neighbor);
-
-                        if (neighborCost < currentCost) {
-                            solution = neighbor;
-                            currentCost = neighborCost;
-                            global_improvement = true;
-                            improved_here = true;
-
-                            
-                            break; 
-                        }
-                    }
-
-                    if (!improved_here) {
-                        mask[index] = 1;
-                        unsuccessful_attempts++;
-                    } else {
-                        unsuccessful_attempts = 0;
-                    }
-                } else {
-                    unsuccessful_attempts++;
-                }
-
-                index = (index + 1) % n;
-
-                if (global_improvement) {
-                    break;
-                }
+            if (mask[index] == 1) {
+                noImprovement++;
+            } else if (tryImprovement(index)) {
+                noImprovement = 0;
+            } else {
+                noImprovement++;
+                mask[index] = 1;
             }
+            
+            index = (index + 1) % n;
         }
     }
 
-    private ArrayList<Integer> apply2opt(ArrayList<Integer> sol, int i, int j) {
-        ArrayList<Integer> newSol = new ArrayList<>();
-        
-        for (int c = 0; c <= i; c++) {
-            newSol.add(sol.get(c));
+    private boolean tryImprovement(int i) {
+        int c1 = solution.get(i); // primera ciudad
+        int c2 = solution.get((i + 1) % n); // ciudad sucesora
+
+        for (int offset = 2; offset <= n - 2; offset++) {
+            int j = (i + offset) % n;
+
+            int c3 = solution.get(j);
+            int c4 = solution.get((j + 1) % n);
+
+            double delta = matrix[c1][c3] + matrix[c2][c4] - matrix[c1][c2] - matrix[c3][c4];
+
+            if (delta < 0) {
+                apply2opt(i, j);
+                currentCost += delta;
+                iterations++;
+
+                mask[i] = 0;
+                mask[j] = 0;
+                mask[(i + 1) % n] = 0;
+                mask[(j + 1) % n] = 0;
+
+                return true;
+            }
         }
-        
-        for (int c = j; c >= i + 1; c--) {
-            newSol.add(sol.get(c));
-        }
-        
-        for (int c = j + 1; c < sol.size(); c++) {
-            newSol.add(sol.get(c));
-        }
-        
-        return newSol;
+
+        return false;
+    }
+
+    private void apply2opt(int i, int j) {
+        int a = Math.min(i, j);
+        int b = Math.max(i, j);  
+        Collections.reverse(solution.subList(a + 1, b + 1));
     }
 
 
     private double calculateCost(ArrayList<Integer> sol) {
         double cost = 0;
         for (int i = 0; i < sol.size(); i++) {
-            int actualCity = sol.get(i);
-            int nextCity = sol.get((i + 1) % sol.size());
-            cost += matrix[actualCity][nextCity];
+            cost += matrix[sol.get(i)][sol.get((i + 1) % sol.size())];
         }
         return cost; 
     }
@@ -110,7 +99,17 @@ public class localSearch {
     }
     
 
-    public ArrayList<Integer> getSolution() {
-        return solution;
-    }
+    public ArrayList<Integer> getSolution() { return solution; }
+    public double getCost() { return currentCost; }
+    public int getIterations() { return iterations; }
 }
+
+/*
+mask esta indexada por posicion, pero tras cada reverse las ciudades cambian de posicion. 
+Un bit a 1 en la posicion 3 pasa a describir otra ciudad distinta de la que se evaluo. En la practica:
+
+Puedes dejar ciudades prometedoras marcadas como apagadas.
+El codigo funciona y termina, pero el DLB es menos preciso de lo que deberia.
+
+Si tu profesor explico la mascara como "vector del tamano de la solucion", por posicion es valido y es lo mas sencillo. 
+Si quieres que sea exacta, hay que indexarla por ciudad con un vector pos[] (como en mi version anterior). Preguntale cual espera. */
