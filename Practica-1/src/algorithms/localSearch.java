@@ -2,7 +2,6 @@
 package algorithms;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class localSearch {
     private static final int MAX_ITERATIONS = 10000;
@@ -13,6 +12,7 @@ public class localSearch {
     protected ArrayList<Integer> solution;
     protected double[][] matrix;
     protected double currentCost;
+    protected int[] pos; // pos[ciudad] = posicion de la ciudad en la ruta
 
     public localSearch(ArrayList<Integer> solution, double[][] matrix) {
         this.n = solution.size();
@@ -21,32 +21,37 @@ public class localSearch {
         this.matrix = matrix;
         this.iterations = 0;
         this.currentCost = calculateCost(this.solution);
+        this.pos = new int[n];
+
+        for (int k = 0; k < n; k++) {
+            pos[this.solution.get(k)] = k;
+        }
 
         search();
     }
 
 
     public void search() {
-        int index = 0;
+        int city = 0;
         int noImprovement = 0; // posiciones consecutivas sin mejora
 
         while (noImprovement < n && iterations < MAX_ITERATIONS) { // si noImprovement >= n, todo mask es 1 (no mejora)
 
-            if (mask[index] == 1) {
+            if (mask[city] == 1) {
                 noImprovement++;
-            } else if (tryImprovement(index)) {
+            } else if (tryImprovement(city)) {
                 noImprovement = 0;
             } else {
                 noImprovement++;
-                mask[index] = 1;
+                mask[city] = 1;
             }
             
-            index = (index + 1) % n;
+            city = (city + 1) % n;
         }
     }
 
-    private boolean tryImprovement(int i) {
-        int c1 = solution.get(i); // primera ciudad
+    private boolean tryImprovement(int c1) {
+        int i = pos[c1]; // posicion de c1
         int c2 = solution.get((i + 1) % n); // ciudad sucesora
 
         for (int offset = 2; offset <= n - 2; offset++) {
@@ -62,10 +67,10 @@ public class localSearch {
                 currentCost += delta;
                 iterations++;
 
-                mask[i] = 0;
-                mask[j] = 0;
-                mask[(i + 1) % n] = 0;
-                mask[(j + 1) % n] = 0;
+                mask[c1] = 0;
+                mask[c2] = 0;
+                mask[c3] = 0;
+                mask[c4] = 0;
 
                 return true;
             }
@@ -76,8 +81,23 @@ public class localSearch {
 
     private void apply2opt(int i, int j) {
         int a = Math.min(i, j);
-        int b = Math.max(i, j);  
-        Collections.reverse(solution.subList(a + 1, b + 1));
+        int b = Math.max(i, j);
+
+        int l = a + 1;
+        int r = b;
+        while (l < r) {
+            int cl = solution.get(l);
+            int cr = solution.get(r);
+
+            solution.set(l, cr);
+            solution.set(r, cl);
+
+            pos[cr] = l;
+            pos[cl] = r;
+
+            l++;
+            r--;
+        }
     }
 
 
@@ -104,12 +124,3 @@ public class localSearch {
     public int getIterations() { return iterations; }
 }
 
-/*
-mask esta indexada por posicion, pero tras cada reverse las ciudades cambian de posicion. 
-Un bit a 1 en la posicion 3 pasa a describir otra ciudad distinta de la que se evaluo. En la practica:
-
-Puedes dejar ciudades prometedoras marcadas como apagadas.
-El codigo funciona y termina, pero el DLB es menos preciso de lo que deberia.
-
-Si tu profesor explico la mascara como "vector del tamano de la solucion", por posicion es valido y es lo mas sencillo. 
-Si quieres que sea exacta, hay que indexarla por ciudad con un vector pos[] (como en mi version anterior). Preguntale cual espera. */
