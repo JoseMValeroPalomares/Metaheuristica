@@ -1,92 +1,143 @@
-
 import algorithms.greedy;
 import algorithms.randomGreedy;
 import algorithms.localSearch;
+import models.ExecutionLogger;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Locale;
 
 public class Main {
+
+    private static final String LOG_DIR = "Practica-1/logs";
+
+    private static String baseName(String path) {
+        String f = Paths.get(path).getFileName().toString();
+        int dot = f.lastIndexOf('.');
+        return dot > 0 ? f.substring(0, dot) : f;
+    }
+
+    private static void header(ExecutionLogger log, String file, String alg,
+                               Long seed, int nCities) {
+        log.section("EJECUCION");
+        log.kv("Fecha", java.time.LocalDateTime.now());
+        log.kv("Archivo", file);
+        log.kv("Algoritmo", alg);
+        if (seed != null) log.kv("Semilla", seed);
+        log.kv("Numero de ciudades", nCities);
+        log.line("");
+    }
+
     public static void main(String[] args) {
         Configurador configurator = new Configurador("Practica-1/config-files/config.txt");
 
         for (int i = 0; i < configurator.getFiles().size(); i++) {
-            String actual_file = configurator.getFiles().get(i);
+            String actualFile = configurator.getFiles().get(i);
+            String base = baseName(actualFile);
 
             System.out.println("\n========================================");
-            System.out.println("Procesando archivo: " + actual_file);
+            System.out.println("Procesando archivo: " + actualFile);
             System.out.println("========================================");
 
-            filesReader file = new filesReader(actual_file);
-
+            filesReader file = new filesReader(actualFile);
             double[][] distanceMatrix = file.getDistanceMatrix();
+            int nCities = distanceMatrix.length;
 
             for (int j = 0; j < configurator.getAlgorithms().size(); j++) {
-                String actualAlgorithm = configurator.getAlgorithms().get(j);
-                
-                System.out.println("\n--- Ejecutando algoritmo: " + actualAlgorithm + " ---");
+                String alg = configurator.getAlgorithms().get(j);
 
-                
-                switch (actualAlgorithm.toLowerCase()) {
-                    case "greedy":
-                        long startTimer = System.nanoTime();
+                System.out.println("\n--- Ejecutando algoritmo: " + alg + " ---");
 
-                        greedy solverGreedy = new greedy(distanceMatrix);
+                try {
+                    switch (alg.toLowerCase()) {
 
-                        long endTimer = System.nanoTime();
+                        case "greedy": {
+                            try (ExecutionLogger log =
+                                     new ExecutionLogger(LOG_DIR, base + "_" + alg)) {
+                                header(log, actualFile, alg, null, nCities);
 
-                        long timeNs = endTimer - startTimer;
-                        double timeMs = timeNs / 1_000_000.0;
-                        
-                        String formatedTime = String.format(java.util.Locale.US, "%.4f", timeMs);
-                    
+                                long t0 = System.nanoTime();
+                                greedy g = new greedy(distanceMatrix);
+                                double ms = (System.nanoTime() - t0) / 1_000_000.0;
+                                String time = String.format(Locale.US, "%.4f", ms);
 
-                        System.out.println("Coste: " + solverGreedy.getCost());
-                        System.out.println("Tiempo: " + formatedTime + " ms");
-                        break;
-                        
-                    case "random_greedy":
-                        for (int s = 0; s < configurator.getSeeds().size(); s++) {
-                            System.out.println("\n--- Ejecutando semilla: " + s + " ---");
-                            startTimer = System.nanoTime();
+                                log.kv("Ruta", ExecutionLogger.route(g.getRute()));
+                                log.kv("Coste", g.getCost());
+                                log.kv("Tiempo (ms)", time);
 
-                            randomGreedy solverRandomGreedy = new randomGreedy(distanceMatrix, configurator.getSeeds().get(s));
-
-                            endTimer = System.nanoTime();
-
-                            timeNs = endTimer - startTimer;
-                            timeMs = timeNs / 1_000_000.0;
-                            
-                            formatedTime = String.format(java.util.Locale.US, "%.4f", timeMs);
-                        
-
-                            System.out.println("Coste: " + solverRandomGreedy.getCost());
-                            System.out.println("Tiempo: " + formatedTime + " ms");
+                                System.out.println("Coste: " + g.getCost());
+                                System.out.println("Tiempo: " + time + " ms");
+                            }
+                            break;
                         }
-                        break;
 
-                    case "local_search":
-                        for (int s = 0; s < configurator.getSeeds().size(); s++) {
-                            System.out.println("\n--- Ejecutando semilla: " + s + " ---");
-                            startTimer = System.nanoTime();
+                        case "random_greedy": {
+                            for (int s = 0; s < configurator.getSeeds().size(); s++) {
+                                long seed = configurator.getSeeds().get(s);
+                                System.out.println("\n--- Ejecutando semilla: " + s + " ---");
 
-                            randomGreedy initial = new randomGreedy(distanceMatrix, configurator.getSeeds().get(s));
+                                try (ExecutionLogger log = new ExecutionLogger(
+                                        LOG_DIR, base + "_" + alg + "_seed" + seed)) {
+                                    header(log, actualFile, alg, seed, nCities);
 
-                            localSearch solverLS = new localSearch(initial.getRute(), distanceMatrix);
+                                    long t0 = System.nanoTime();
+                                    randomGreedy rg = new randomGreedy(distanceMatrix, seed);
+                                    double ms = (System.nanoTime() - t0) / 1_000_000.0;
+                                    String time = String.format(Locale.US, "%.4f", ms);
 
-                            endTimer = System.nanoTime();
+                                    log.kv("Ciudad inicial", rg.getInitialCity());
+                                    log.kv("Ruta", ExecutionLogger.route(rg.getRute()));
+                                    log.kv("Coste", rg.getCost());
+                                    log.kv("Tiempo (ms)", time);
 
-                            timeNs = endTimer - startTimer;
-                            timeMs = timeNs / 1_000_000.0;
-                            formatedTime = String.format(java.util.Locale.US, "%.4f", timeMs);
-
-                            System.out.println("Coste inicial (greedy aleatorio): " + initial.getCost());
-                            System.out.println("Coste final (busqueda local): " + solverLS.getCost());
-                            System.out.println("Iteraciones: " + solverLS.getIterations());
-                            System.out.println("Tiempo: " + formatedTime + " ms");
+                                    System.out.println("Coste: " + rg.getCost());
+                                    System.out.println("Tiempo: " + time + " ms");
+                                }
+                            }
+                            break;
                         }
-                        break;
 
+                        case "local_search": {
+                            for (int s = 0; s < configurator.getSeeds().size(); s++) {
+                                long seed = configurator.getSeeds().get(s);
+                                System.out.println("\n--- Ejecutando semilla: " + s + " ---");
+
+                                try (ExecutionLogger log = new ExecutionLogger(
+                                        LOG_DIR, base + "_" + alg + "_seed" + seed)) {
+                                    header(log, actualFile, alg, seed, nCities);
+
+                                    long t0 = System.nanoTime();
+                                    randomGreedy init = new randomGreedy(distanceMatrix, seed);
+
+                                    log.kv("Ciudad inicial", init.getInitialCity());
+                                    log.kv("Ruta inicial", ExecutionLogger.route(init.getRute()));
+                                    log.kv("Coste inicial", init.getCost());
+                                    log.line("Movimientos:");
+
+                                    localSearch ls = new localSearch(init.getRute(), distanceMatrix, log);
+                                    double ms = (System.nanoTime() - t0) / 1_000_000.0;
+                                    String time = String.format(Locale.US, "%.4f", ms);
+
+                                    log.kv("Ruta final", ExecutionLogger.route(ls.getSolution()));
+                                    log.kv("Coste final", String.format(Locale.US, "%.2f", ls.getCost()));
+                                    log.kv("Iteraciones", ls.getIterations());
+                                    log.kv("Tiempo (ms)", time);
+
+                                    System.out.println("Coste inicial (greedy aleatorio): " + init.getCost());
+                                    System.out.println("Coste final (busqueda local): " + ls.getCost());
+                                    System.out.println("Iteraciones: " + ls.getIterations());
+                                    System.out.println("Tiempo: " + time + " ms");
+                                }
+                            }
+                            break;
+                        }
+
+                        default:
+                            System.out.println("Algoritmo desconocido: " + alg);
+                    }
+                } catch (IOException e) {
+                    System.out.println("Error con el log: " + e);
                 }
             }
         }
-
     }
 }

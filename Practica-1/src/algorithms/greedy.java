@@ -87,6 +87,10 @@ public class greedy {
         return greedyRute;
     }
 
+    public int getInitialCity() {
+        return initialCity;
+    }
+
     public double getCost() {
         double cost = 0.0;
         int n = greedyRute.size();
