@@ -10,11 +10,15 @@ public class Configurador {
     ArrayList<String> files;
     ArrayList<String> algorithms;
     ArrayList<Long> seeds;
+    ArrayList<String> logAlgorithms;
+    ArrayList<String> terminalAlgorithms;
 
     public Configurador(String rute) {
         files = new ArrayList<>();
         algorithms = new ArrayList<>();
         seeds = new ArrayList<>();
+        logAlgorithms = new ArrayList<>();
+        terminalAlgorithms = new ArrayList<>();
         String line;
         FileReader f = null;
 
@@ -44,6 +48,16 @@ public class Configurador {
                             seeds.add(Long.parseLong(vseeds[i]));
                         }
                         break;
+                    case "log":
+                        for (String a : split[1].trim().split(" ")) {
+                            logAlgorithms.add(a.toLowerCase());
+                        }
+                        break;
+                    case "terminal":
+                        for (String a : split[1].trim().split(" ")) {
+                            terminalAlgorithms.add(a.toLowerCase());
+                        }
+                        break;
                 }
             }
 
@@ -65,6 +79,14 @@ public class Configurador {
 
     public ArrayList<Long> getSeeds() {
         return seeds;
+    }
+
+    public boolean toLog(String alg) {
+    return logAlgorithms.contains("all") || logAlgorithms.contains(alg.toLowerCase());
+    }
+
+    public boolean toTerminal(String alg) {
+        return terminalAlgorithms.contains("all") || terminalAlgorithms.contains(alg.toLowerCase());
     }
 
 
