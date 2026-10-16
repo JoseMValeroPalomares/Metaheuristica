@@ -135,8 +135,6 @@ public class localSearch {
     }
 
     public ArrayList<Integer> getSolution() { return solution; }
-    public double getCost() { 
-        currentCost = Math.round(currentCost * 100.0) / 100.0;
-        return currentCost; }
+    public double getCost() { return Math.round(currentCost * 100.0) / 100.0;}
     public int getIterations() { return iterations; }
 }

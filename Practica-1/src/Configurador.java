@@ -12,6 +12,10 @@ public class Configurador {
     ArrayList<Long> seeds;
     ArrayList<String> logAlgorithms;
     ArrayList<String> terminalAlgorithms;
+    int tabuIterations = 10000;
+    double tabuStagnation = 5;     // porcentaje
+    int tabuTenure = 10;
+    double tabuOscillation = 50;   // porcentaje
 
     public Configurador(String rute) {
         files = new ArrayList<>();
@@ -21,6 +25,7 @@ public class Configurador {
         terminalAlgorithms = new ArrayList<>();
         String line;
         FileReader f = null;
+        
 
         try {
             f = new FileReader(rute);
@@ -58,6 +63,21 @@ public class Configurador {
                             terminalAlgorithms.add(a.toLowerCase());
                         }
                         break;
+                    case "tabu_iterations":
+                        tabuIterations = Integer.parseInt(split[1].trim());
+                        break;
+
+                    case "tabu_stagnation":
+                        tabuStagnation = Double.parseDouble(split[1].trim());
+                        break;
+
+                    case "tabu_tenure":
+                        tabuTenure = Integer.parseInt(split[1].trim());
+                        break;
+
+                    case "tabu_oscillation":
+                        tabuOscillation = Double.parseDouble(split[1].trim());
+    break;
                 }
             }
 
@@ -88,6 +108,11 @@ public class Configurador {
     public boolean toTerminal(String alg) {
         return terminalAlgorithms.contains("all") || terminalAlgorithms.contains(alg.toLowerCase());
     }
+
+    public int getTabuIterations() { return tabuIterations; }
+    public double getTabuStagnation() { return tabuStagnation; }
+    public int getTabuTenure() { return tabuTenure; }
+    public double getTabuOscillation() { return tabuOscillation; }
 
 
 } 

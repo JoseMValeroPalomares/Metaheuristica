@@ -1,6 +1,7 @@
 import algorithms.greedy;
 import algorithms.randomGreedy;
 import algorithms.localSearch;
+import algorithms.tabuSearch;
 import models.ExecutionLogger;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -8,9 +9,12 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+
 public class Main {
 
     private static final String LOG_DIR = "Practica-1/logs";
+    // Maximo de vecinos evaluados por iteracion (si el entorno es mayor, se muestrea)
+    private static final int TABU_NEIGHBOR_LIMIT = 50_000;
 
     private static String baseName(String path) {
         String f = Paths.get(path).getFileName().toString();
@@ -155,6 +159,59 @@ public class Main {
                                         System.out.println("Coste final (busqueda local): " + ls.getCost());
                                         System.out.println("Iteraciones: " + ls.getIterations());
                                         System.out.println("Tiempo (solo busqueda local): " + time + " ms");
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                        case "tabu": {
+                            for (int s = 0; s < configurator.getSeeds().size(); s++) {
+                                long seed = configurator.getSeeds().get(s);
+                                if (term) System.out.println("\n--- Ejecutando semilla: " + s + " ---");
+
+                                try (ExecutionLogger log = openLog(configurator, alg,
+                                        base + "_" + alg + "_seed" + seed)) {
+                                    header(log, actualFile, alg, seed, nCities);
+
+                                    // misma solucion inicial que la busqueda local
+                                    randomGreedy init = initialSolutions.get(seed);
+                                    if (init == null) {
+                                        init = new randomGreedy(distanceMatrix, seed);
+                                        initialSolutions.put(seed, init);
+                                    }
+
+                                    if (log != null) {
+                                        log.kv("Ciudad inicial", init.getInitialCity());
+                                        log.kv("Ruta inicial", ExecutionLogger.route(init.getRute()));
+                                        log.kv("Coste inicial", init.getCost());
+                                    }
+
+                                    long t0 = System.nanoTime();
+                                    tabuSearch ts = new tabuSearch(init.getRute(), distanceMatrix, seed,
+                                                        configurator.getTabuIterations(),
+                                                        configurator.getTabuStagnation(),
+                                                        configurator.getTabuTenure(),
+                                                        configurator.getTabuOscillation(),
+                                                        TABU_NEIGHBOR_LIMIT, log);
+                                    double ms = (System.nanoTime() - t0) / 1_000_000.0;
+                                    String time = String.format(Locale.US, "%.4f", ms);
+
+                                    if (log != null) {
+                                        log.kv("Ruta final", ExecutionLogger.route(ts.getSolution()));
+                                        log.kv("Coste final", String.format(Locale.US, "%.2f", ts.getCost()));
+                                        log.kv("Iteraciones", ts.getIterations());
+                                        log.kv("Reinicios", ts.getRestarts());
+                                        log.kv("Tiempo (ms)", time);
+                                    }
+                                    if (term) {
+                                        System.out.println("Coste inicial (greedy aleatorio): "
+                                                + String.format(Locale.US, "%.2f", init.getCost()));
+                                        System.out.println("Coste final (tabu): "
+                                                + String.format(Locale.US, "%.2f", ts.getCost()));
+                                        System.out.println("Reinicios: " + ts.getRestarts()
+                                                + " (intensif=" + ts.getIntensifications()
+                                                + ", diversif=" + ts.getDiversifications() + ")");
+                                        System.out.println("Tiempo: " + time + " ms");
                                     }
                                 }
                             }
