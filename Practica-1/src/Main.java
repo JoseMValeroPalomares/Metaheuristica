@@ -187,15 +187,15 @@ public class Main {
                                     }
 
                                     long t0 = System.nanoTime();
-                                    tabuSearch ts = new tabuSearch(init.getRute(), distanceMatrix, seed,
-                                                        configurator.getTabuIterations(),
-                                                        configurator.getTabuStagnation(),
-                                                        configurator.getTabuTenure(),
-                                                        configurator.getTabuOscillation(),
-                                                        TABU_NEIGHBOR_LIMIT, log);
+                                    tabuSearch ts = new tabuSearch(init.getRute(), distanceMatrix,
+                                                                configurator.getTabuIterations(),
+                                                                configurator.getTabuStagnation(),
+                                                                configurator.getTabuTenure(),
+                                                                configurator.getTabuOscillation(),
+                                                                log);
                                     double ms = (System.nanoTime() - t0) / 1_000_000.0;
                                     String time = String.format(Locale.US, "%.4f", ms);
-
+                                    /* 
                                     if (log != null) {
                                         log.kv("Ruta final", ExecutionLogger.route(ts.getSolution()));
                                         log.kv("Coste final", String.format(Locale.US, "%.2f", ts.getCost()));
@@ -213,6 +213,7 @@ public class Main {
                                                 + ", diversif=" + ts.getDiversifications() + ")");
                                         System.out.println("Tiempo: " + time + " ms");
                                     }
+                                        */
                                 }
                             }
                             break;
