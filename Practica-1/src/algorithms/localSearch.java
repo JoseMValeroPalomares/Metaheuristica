@@ -64,58 +64,65 @@ public class localSearch {
 
     private boolean tryImprovement(int c1) {
         int i = pos[c1];
-        int c2 = solution.get((i + 1) % n);
 
-        for (int offset = 2; offset <= n - 2; offset++) {
+        for (int offset = 1; offset < n; offset++) {
             int j = (i + offset) % n;
+            int c2 = solution.get(j);
 
-            int c3 = solution.get(j);
-            int c4 = solution.get((j + 1) % n);
-
-            double delta = matrix[c1][c3] + matrix[c2][c4] - matrix[c1][c2] - matrix[c3][c4];
+            double delta = swapDelta(i, j);
 
             if (delta < 0) {
                 if (log != null) {
                     log.line(String.format(Locale.US,
-                        "  Iter %4d | 2-opt pos(%d,%d) | quita (%d-%d),(%d-%d) | anade (%d-%d),(%d-%d) | delta=%.4f | coste %.4f -> %.4f",
-                        iterations + 1, i, j,
-                        c1, c2, c3, c4,
-                        c1, c3, c2, c4,
+                        "  Iter %4d | swap pos(%d,%d) ciudades (%d,%d) | delta=%.4f | coste %.4f -> %.4f",
+                        iterations + 1, i, j, c1, c2,
                         delta, currentCost, currentCost + delta));
                 }
                 apply2opt(i, j);
                 currentCost += delta;
                 iterations++;
+
                 mask[c1] = 0;
                 mask[c2] = 0;
-                mask[c3] = 0;
-                mask[c4] = 0;
                 return true;
             }
-        }
-
+        }  
         return false;
     }
 
-    private void apply2opt(int i, int j) {
-        int a = Math.min(i, j);
-        int b = Math.max(i, j);
+    private double swapDelta(int i, int j) { // Recibe dos posiciones de la ruta y devuelve cuánto variaría el coste si intercambiaras sus ciudades:
+        int a = solution.get(i);
+        int b = solution.get(j);
 
-        int l = a + 1;
-        int r = b;
-        while (l < r) {
-            int cl = solution.get(l);
-            int cr = solution.get(r);
+        int pi = (i - 1 + n) % n, si = (i + 1) % n;
+        int pj = (j - 1 + n) % n, sj = (j + 1) % n;
 
-            solution.set(l, cr);
-            solution.set(r, cl);
-
-            pos[cr] = l;
-            pos[cl] = r;
-
-            l++;
-            r--;
+        // Caso 1: j va justo despues de i  ->  ... p a b s ...  pasa a  ... p b a s ...
+        if (si == j) {
+            int p = solution.get(pi), s = solution.get(sj);
+            return matrix[p][b] + matrix[a][s] - matrix[p][a] - matrix[b][s];
         }
+
+        // Caso 2: i va justo despues de j (ocurre con la ultima y la primera ciudad)
+        if (sj == i) {
+            int p = solution.get(pj), s = solution.get(si);
+            return matrix[p][a] + matrix[b][s] - matrix[p][b] - matrix[a][s];
+        }
+
+        // Caso 3: no adyacentes -> cambian 4 arcos
+        int p1 = solution.get(pi), s1 = solution.get(si);
+        int p2 = solution.get(pj), s2 = solution.get(sj);
+        return matrix[p1][b] + matrix[b][s1] + matrix[p2][a] + matrix[a][s2]
+            - matrix[p1][a] - matrix[a][s1] - matrix[p2][b] - matrix[b][s2];
+    }
+
+    private void apply2opt(int i, int j) { // Intercambia las ciudades
+        int a = solution.get(i);
+        int b = solution.get(j);
+        solution.set(i, b);
+        solution.set(j, a);
+        pos[b] = i;
+        pos[a] = j;
     }
 
     private double calculateCost(ArrayList<Integer> sol) {
