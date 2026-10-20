@@ -13,12 +13,17 @@ public class tabuSearch {
     private double stagnationRate;
     private double intensifyProb;
 
+    protected ArrayList<Integer> solution; // Solucion actual
+    protected ArrayList<Integer> bestMoment; // Mejor solucion encontrada    
+    protected ArrayList<Integer> bestGlobal; // Mejor solucion global
+    protected double currentCost;
+    protected double bestMomentCost;
+    protected double bestGlobalCost;
+
     protected int iterations;
     protected int[] mask;
     protected int n;
-    protected ArrayList<Integer> solution;
     protected double[][] matrix;
-    protected double currentCost;
     protected int[] pos; // pos[ciudad] = posicion de la ciudad en la ruta
 
     private ExecutionLogger log; // puede ser null
@@ -32,21 +37,28 @@ public class tabuSearch {
         this.stagnationRate = stagnationPercent / 100.0;
         this.intensifyProb = oscillationPercent / 100.0;
 
+        this.solution = new ArrayList<>(solution);
+        this.currentCost = calculateCost(this.solution);
+        this.bestMoment = new ArrayList<>(this.solution);
+        this.bestGlobal = new ArrayList<>(this.solution);
+        this.bestMomentCost = this.currentCost;
+        this.bestGlobalCost = this.currentCost;
+        
+        this.matrix = matrix;
+        this.iterations = 0;
+        this.pos = new int[n];
         this.log = log;
         this.n = solution.size();
         this.mask = new int[n];
-        this.solution = new ArrayList<>(solution);
-        this.matrix = matrix;
-        this.iterations = 0;
-        this.currentCost = calculateCost(this.solution);
-        this.pos = new int[n];
+
         for (int k = 0; k < n; k++) {
             pos[this.solution.get(k)] = k;
         }
+
         search();
     }
 
-        public void search() {
+    public void search() {
         int city = 0;
         int noImprovement = 0;
 
@@ -78,7 +90,7 @@ public class tabuSearch {
             int j = (i + offset) % n;
             int c2 = solution.get(j);
 
-            double delta = swapDelta(i, j);
+            double delta = checkMove(i, j);
 
             if (delta < 0) {
                 if (log != null) {
@@ -99,7 +111,7 @@ public class tabuSearch {
         return false;
     }
 
-    private double swapDelta(int i, int j) { // Recibe dos posiciones de la ruta y devuelve cuánto variaría el coste si intercambiaras sus ciudades:
+    private double checkMove(int i, int j) { // Recibe dos posiciones de la ruta y devuelve cuánto variaría el coste si intercambiaras sus ciudades:
         int a = solution.get(i);
         int b = solution.get(j);
 

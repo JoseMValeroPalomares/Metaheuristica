@@ -69,7 +69,7 @@ public class localSearch {
             int j = (i + offset) % n;
             int c2 = solution.get(j);
 
-            double delta = swapDelta(i, j);
+            double delta = checkMove(i, j);
 
             if (delta < 0) {
                 if (log != null) {
@@ -90,7 +90,7 @@ public class localSearch {
         return false;
     }
 
-    private double swapDelta(int i, int j) { // Recibe dos posiciones de la ruta y devuelve cuánto variaría el coste si intercambiaras sus ciudades:
+    private double checkMove(int i, int j) { // Recibe dos posiciones de la ruta y devuelve cuánto variaría el coste si intercambiaras sus ciudades:
         int a = solution.get(i);
         int b = solution.get(j);
 
