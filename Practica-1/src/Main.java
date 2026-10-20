@@ -13,8 +13,6 @@ import java.util.Map;
 public class Main {
 
     private static final String LOG_DIR = "Practica-1/logs";
-    // Maximo de vecinos evaluados por iteracion (si el entorno es mayor, se muestrea)
-    private static final int TABU_NEIGHBOR_LIMIT = 50_000;
 
     private static String baseName(String path) {
         String f = Paths.get(path).getFileName().toString();
@@ -184,10 +182,12 @@ public class Main {
                                         log.kv("Ciudad inicial", init.getInitialCity());
                                         log.kv("Ruta inicial", ExecutionLogger.route(init.getRute()));
                                         log.kv("Coste inicial", init.getCost());
+                                        log.line("");
                                     }
 
+                                    // el cronometro mide solo la busqueda tabu
                                     long t0 = System.nanoTime();
-                                    tabuSearch ts = new tabuSearch(init.getRute(), distanceMatrix,
+                                    tabuSearch ts = new tabuSearch(init.getRute(), distanceMatrix, seed,
                                                                 configurator.getTabuIterations(),
                                                                 configurator.getTabuStagnation(),
                                                                 configurator.getTabuTenure(),
@@ -195,7 +195,7 @@ public class Main {
                                                                 log);
                                     double ms = (System.nanoTime() - t0) / 1_000_000.0;
                                     String time = String.format(Locale.US, "%.4f", ms);
-                                    /* 
+
                                     if (log != null) {
                                         log.kv("Ruta final", ExecutionLogger.route(ts.getSolution()));
                                         log.kv("Coste final", String.format(Locale.US, "%.2f", ts.getCost()));
@@ -208,17 +208,24 @@ public class Main {
                                                 + String.format(Locale.US, "%.2f", init.getCost()));
                                         System.out.println("Coste final (tabu): "
                                                 + String.format(Locale.US, "%.2f", ts.getCost()));
+                                        System.out.println("Optimo local (DLB todo a 1) en iteracion: "
+                                                + (ts.getFirstConvergence() < 0 ? "no alcanzado" : ts.getFirstConvergence()));
+                                        System.out.println("Iteraciones: " + ts.getIterations()
+                                                + " (fase TS: " + ts.getTsIterations() + ")");
                                         System.out.println("Reinicios: " + ts.getRestarts()
                                                 + " (intensif=" + ts.getIntensifications()
                                                 + ", diversif=" + ts.getDiversifications() + ")");
                                         System.out.println("Tiempo: " + time + " ms");
+
+                                        // Comprobacion de la MLP (borrar cuando coincida)
+                                        System.out.println("Suma MLP: " + ts.longTermMemorySum()
+                                                + " | esperado: " + (long) nCities
+                                                * (ts.getIterations() + 1 + ts.getRestarts()));
                                     }
-                                        */
                                 }
                             }
                             break;
                         }
-
                         default:
                             System.out.println("Algoritmo desconocido: " + alg);
                     }
