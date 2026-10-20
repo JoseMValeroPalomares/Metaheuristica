@@ -7,6 +7,7 @@ import models.ExecutionLogger;
 
 public class localSearch {
     private static final int MAX_ITERATIONS = 10000;
+    private static final double EPS = 1e-10;
 
     protected int iterations;
     protected int[] mask;
@@ -71,7 +72,7 @@ public class localSearch {
 
             double delta = checkMove(i, j);
 
-            if (delta < 0) {
+            if (delta < -EPS) {
                 if (log != null) {
                     log.line(String.format(Locale.US,
                         "  Iter %4d | swap pos(%d,%d) ciudades (%d,%d) | delta=%.4f | coste %.4f -> %.4f",
