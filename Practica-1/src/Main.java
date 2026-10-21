@@ -216,11 +216,6 @@ public class Main {
                                                 + " (intensif=" + ts.getIntensifications()
                                                 + ", diversif=" + ts.getDiversifications() + ")");
                                         System.out.println("Tiempo: " + time + " ms");
-
-                                        // Comprobacion de la MLP (borrar cuando coincida)
-                                        System.out.println("Suma MLP: " + ts.longTermMemorySum()
-                                                + " | esperado: " + (long) nCities
-                                                * (ts.getIterations() + 1 + ts.getRestarts()));
                                     }
                                 }
                             }
