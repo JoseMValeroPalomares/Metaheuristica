@@ -9,7 +9,6 @@ import models.ExecutionLogger;
 public class tabuSearch {
     private static final double EPS = 1e-10;
 
-    // Parametros config.txt
     private int maxIterations;
     private int tenure;
     private double stagnationRate;
@@ -17,21 +16,20 @@ public class tabuSearch {
     private Random rnd;
 
     protected int iterations;
-    protected int[] mask;                // DLB indexado por ciudad
+    protected int[] mask;
     protected int n;
     protected double[][] matrix;
-    protected int[] pos;                 // pos[ciudad] = posicion en la ruta
+    protected int[] pos;
 
     // Triangulo superior (min,max) = MCP | triangulo inferior (max,min) = MLP
     protected short[][] memory;
-    private ArrayList<int[]> tabuList = new ArrayList<>();   // celdas de la MCP con valor > 0
+    private ArrayList<int[]> tabuList = new ArrayList<>();
 
-    // Las tres soluciones del enunciado
-    protected ArrayList<Integer> solution;     // solucion_actual
+    protected ArrayList<Integer> solution;
     protected double currentCost;
-    protected ArrayList<Integer> bestMoment;   // mejor_momento_actual
+    protected ArrayList<Integer> bestMoment;
     protected double bestMomentCost;
-    protected ArrayList<Integer> bestGlobal;   // mejor_global
+    protected ArrayList<Integer> bestGlobal;
     protected double bestGlobalCost;
 
     private int firstConvergence = -1;
@@ -40,7 +38,7 @@ public class tabuSearch {
     private int intensifications = 0;
     private int diversifications = 0;
 
-    private ExecutionLogger log; // puede ser null
+    private ExecutionLogger log;
 
     public tabuSearch(ArrayList<Integer> solution, double[][] matrix, long seed,
                       int maxIterations, double stagnationPercent, int tenure,
@@ -69,11 +67,9 @@ public class tabuSearch {
         this.bestGlobal = new ArrayList<>(this.solution);
         this.bestGlobalCost = currentCost;
 
-        updateLongTermMemory();   // la solucion inicial tambien cuenta
+        updateLongTermMemory();
         search();
     }
-
-    // ================= BUCLE PRINCIPAL =================
 
     public void search() {
         if (log != null) {
@@ -85,8 +81,6 @@ public class tabuSearch {
         }
 
         while (iterations < maxIterations) {
-
-            // ---- Fase 1: busqueda local con DLB ----
             if (log != null) log.line("FASE LS (busqueda local con DLB):");
             boolean converged = localSearchPhase();
             updateBestGlobal();
@@ -106,11 +100,9 @@ public class tabuSearch {
                     iterations, currentCost));
             }
 
-            // ---- Fase 2: busqueda tabu hasta estancamiento ----
             boolean stagnated = tabuPhase();
             if (!stagnated || iterations >= maxIterations) break;
 
-            // ---- Oscilacion estrategica: solucion nueva y vuelta a la fase LS ----
             restart(rnd.nextDouble() < intensifyProb);
         }
 
@@ -123,9 +115,6 @@ public class tabuSearch {
         }
     }
 
-    // ================= FASE LS (primer mejor + DLB) =================
-
-    // Devuelve true si el DLB queda todo a 1; false si se agotan las iteraciones antes
     private boolean localSearchPhase() {
         int city = 0;
         int noImprovement = 0;
@@ -172,12 +161,9 @@ public class tabuSearch {
         return false;
     }
 
-    // ================= FASE TS =================
-
-    // Devuelve true si termina por estancamiento; false si se agotan las iteraciones
     private boolean tabuPhase() {
         int threshold = Math.max(1, (int) (maxIterations * stagnationRate));
-        int worsening = 0;   // movimientos seguidos que no mejoran a bestMoment
+        int worsening = 0;
         int city = 0;
 
         if (log != null) log.line("FASE TS (busqueda tabu):");
@@ -186,13 +172,12 @@ public class tabuSearch {
             int c1 = city;
             int i = pos[c1];
 
-            // 1. Mejor intercambio de esta ciudad que no sea tabu, aunque empeore
             int bestJ = -1;
             double bestDelta = Double.MAX_VALUE;
 
             for (int j = 0; j < n; j++) {
                 if (j == i) continue;
-                if (isTabu(c1, solution.get(j))) continue;    // MCP, sin aspiracion
+                if (isTabu(c1, solution.get(j))) continue;
 
                 double delta = checkMove(i, j);
                 if (delta < bestDelta) {
@@ -201,24 +186,21 @@ public class tabuSearch {
                 }
             }
 
-            // Todos los movimientos de esta ciudad son tabu: no se mueve nada
             if (bestJ == -1) {
                 decrementTabu();
                 city = (city + 1) % n;
                 continue;
             }
 
-            // 2. Se aplica el movimiento y se actualizan las memorias
             int c2 = solution.get(bestJ);
-            decrementTabu();               // MCP: -1 a los movimientos tabu existentes
+            decrementTabu();
             apply2opt(i, bestJ);
-            markTabu(c1, c2);              // MCP: el par recien intercambiado pasa a ser tabu
-            updateLongTermMemory();        // MLP
+            markTabu(c1, c2);
+            updateLongTermMemory();
             currentCost += bestDelta;
             iterations++;
             tsIterations++;
 
-            // 3. Mejor momento, mejor global y contador de estancamiento
             if (currentCost < bestMomentCost - EPS) {
                 bestMoment = new ArrayList<>(solution);
                 bestMomentCost = currentCost;
@@ -240,25 +222,22 @@ public class tabuSearch {
         return worsening >= threshold;
     }
 
-    // ================= OSCILACION ESTRATEGICA =================
-
     private void restart(boolean intensify) {
         double before = currentCost;
 
-        // Solucion nueva a partir de la MLP
         solution = buildFromLongTermMemory(intensify);
         for (int k = 0; k < n; k++) {
             pos[solution.get(k)] = k;
         }
         currentCost = calculateCost(solution);
 
-        // Se reinician todas las estructuras salvo la MLP y el mejor global
+        // Se reinicia todo menos la MLP y el mejor global
         resetShortTermMemory();
         Arrays.fill(mask, 0);
         bestMoment = new ArrayList<>(solution);
         bestMomentCost = currentCost;
         updateBestGlobal();
-        updateLongTermMemory();            // la solucion nueva tambien es una solucion visitada
+        updateLongTermMemory();
 
         restarts++;
         if (intensify) intensifications++; else diversifications++;
@@ -272,9 +251,7 @@ public class tabuSearch {
         }
     }
 
-    // Intensificar -> siguiente ciudad por el arco MAS frecuente
-    // Diversificar -> siguiente ciudad por el arco MENOS frecuente
-    // En caso de empate, la ciudad mas cercana. La ciudad de partida es aleatoria.
+    // Intensificar: arco mas frecuente; diversificar: el menos frecuente. Empate -> ciudad mas cercana
     private ArrayList<Integer> buildFromLongTermMemory(boolean intensify) {
         ArrayList<Integer> route = new ArrayList<>(n);
         boolean[] visited = new boolean[n];
@@ -312,8 +289,6 @@ public class tabuSearch {
         return route;
     }
 
-    // ================= MCP (triangulo superior) =================
-
     private boolean isTabu(int x, int y) {
         return memory[Math.min(x, y)][Math.max(x, y)] > 0;
     }
@@ -335,15 +310,12 @@ public class tabuSearch {
         }
     }
 
-    // Vacia la MCP sin tocar la MLP
     private void resetShortTermMemory() {
         for (int[] cell : tabuList) {
             memory[cell[0]][cell[1]] = 0;
         }
         tabuList.clear();
     }
-
-    // ================= MLP (triangulo inferior) =================
 
     private void updateLongTermMemory() {
         for (int k = 0; k < n; k++) {
@@ -357,7 +329,6 @@ public class tabuSearch {
         return memory[Math.max(x, y)][Math.min(x, y)];
     }
 
-    // Comprobacion: debe valer n * (iteraciones + 1 + reinicios)
     public long longTermMemorySum() {
         long sum = 0;
         for (int a = 0; a < n; a++) {
@@ -367,8 +338,6 @@ public class tabuSearch {
         }
         return sum;
     }
-
-    // ================= OPERADOR: INTERCAMBIO DE DOS CIUDADES =================
 
     private double checkMove(int i, int j) {
         int a = solution.get(i);
@@ -399,8 +368,6 @@ public class tabuSearch {
         pos[b] = i;
         pos[a] = j;
     }
-
-    // ================= UTILIDADES =================
 
     private void updateBestGlobal() {
         if (currentCost < bestGlobalCost - EPS) {
