@@ -74,11 +74,11 @@ public class Main {
                                                 try (ExecutionLogger log = openLog(configurator, alg, base + "_" + alg)) {
                                                     header(log, actualFile, alg, null, nCities);
 
-                                                    genAlg genetico = new genAlg(distanceMatrix, E, kBest, kWorst, cruce, seed);
+                                                    genAlg gen_alg = new genAlg(distanceMatrix, E, kBest, kWorst, cruce, seed);
 
                                                     if (term) {
-                                                        genetico.ejecutar();
-                                                        genetico.mostrarPoblacion();
+                                                        gen_alg.ejecutar();
+                                                        gen_alg.mostrarPoblacion();
                                                     }
                                                 }
                                         
