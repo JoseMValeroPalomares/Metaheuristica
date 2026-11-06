@@ -89,6 +89,7 @@ public class Main {
                                     }
                                 }
                             }
+                            break;
                         }
                         default:
                             System.out.println("Algoritmo desconocido: " + alg);
