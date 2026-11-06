@@ -1,5 +1,9 @@
-files=Practica-2/config-files/a280.tsp Practica-2/config-files/ch130.tsp Practica-2/config-files/d18512.tsp Practica-2/config-files/pr144.tsp Practica-2/config-files/u1060.tsp
-algorithms=random_greedy
-seeds=12345678 23456781 34567812
+files=config-files/a280.tsp config-files/ch130.tsp config-files/d18512.tsp config-files/pr144.tsp config-files/u1060.tsp
+algorithms=gen_alg
+seeds=12345678
 log=none
-terminal=random_greedy
+terminal=gen_alg
+tipo_cruce=OX2 MOC
+E=1 2 3
+kBest=2 3
+kWorst=2 3
