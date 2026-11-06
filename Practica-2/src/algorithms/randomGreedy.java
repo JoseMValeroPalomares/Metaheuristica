@@ -6,21 +6,19 @@ import java.util.Random;
 
 public class randomGreedy extends greedy {
 
-    private long seed;
-    private static int K = 5;
+    private Random rand;
+    private int K;
 
-    public randomGreedy(double[][] matrix, long seed) {
+    public randomGreedy(double[][] matrix, Random rand, int K) {
         super(matrix, false); // Llamar al constructor del padre.
-        this.seed = seed;
+        this.rand = rand;
+        this.K = K;
         executeGreedy();
     }
 
 
     @Override
     protected void executeGreedy() {
-        // Inicializacion numero random
-        Random rand = new Random(this.seed);
-
         // Copia del vector ordenado <ciudad, distancia_al_resto>; se van eliminando las elegidas
         ArrayList<pairVector> remaining = new ArrayList<>(sumCities);
 
