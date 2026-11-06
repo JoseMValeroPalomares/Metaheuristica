@@ -77,7 +77,8 @@ public class Main {
                                                     genAlg genetico = new genAlg(distanceMatrix, E, kBest, kWorst, cruce, seed);
 
                                                     if (term) {
-                                                        System.out.println("Tam poblacion: " + genetico.get_tam_poblacion());
+                                                        genetico.ejecutar();
+                                                        genetico.mostrarPoblacion();
                                                     }
                                                 }
                                         
