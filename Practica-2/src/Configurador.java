@@ -12,6 +12,10 @@ public class Configurador {
     ArrayList<Long> seeds;
     ArrayList<String> logAlgorithms;
     ArrayList<String> terminalAlgorithms;
+    ArrayList<String> cruces;
+    ArrayList<Integer> Es;
+    ArrayList<Integer> kBests;
+    ArrayList<Integer> kWorsts;
 
     public Configurador(String rute) {
         files = new ArrayList<>();
@@ -19,6 +23,10 @@ public class Configurador {
         seeds = new ArrayList<>();
         logAlgorithms = new ArrayList<>();
         terminalAlgorithms = new ArrayList<>();
+        cruces = new ArrayList<>();
+        Es = new ArrayList<>();
+        kBests = new ArrayList<>();
+        kWorsts = new ArrayList<>();
         String line;
         FileReader f = null;
         
@@ -59,6 +67,30 @@ public class Configurador {
                             terminalAlgorithms.add(a.toLowerCase());
                         }
                         break;
+                    case "tipo_cruce":
+                        for (String a : split[1].trim().split(" ")) {
+                            cruces.add(a.toLowerCase());
+                        }
+                        break;
+                    case "E":
+                        String[] vEs = split[1].split(" ");
+                        for (int i = 0; i < vEs.length; i++) {
+                            Es.add(Integer.parseInt(vEs[i]));
+                        }
+                        break;
+                    case "kBest":
+                        String[] vkBests = split[1].split(" ");
+                        for (int i = 0; i < vkBests.length; i++) {
+                            kBests.add(Integer.parseInt(vkBests[i]));
+                        }
+                        break;
+                    
+                    case "kWorst":
+                        String[] vkWorsts = split[1].split(" ");
+                        for (int i = 0; i < vkWorsts.length; i++) {
+                            kWorsts.add(Integer.parseInt(vkWorsts[i]));
+                        }
+                        break;
                 }
             }
 
@@ -82,6 +114,22 @@ public class Configurador {
         return seeds;
     }
 
+    public ArrayList<String> get_cruces() {
+        return cruces;
+    }
+
+    public ArrayList<Integer> get_Es() {
+        return Es;
+    }
+
+    public ArrayList<Integer> get_kBests() {
+        return kBests;
+    }
+
+    public ArrayList<Integer> get_kWorsts() {
+        return kWorsts;
+    }
+
     public boolean toLog(String alg) {
     return logAlgorithms.contains("all") || logAlgorithms.contains(alg.toLowerCase());
     }
@@ -89,5 +137,6 @@ public class Configurador {
     public boolean toTerminal(String alg) {
         return terminalAlgorithms.contains("all") || terminalAlgorithms.contains(alg.toLowerCase());
     }
+
 
 } 

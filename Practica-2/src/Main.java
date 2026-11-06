@@ -1,10 +1,7 @@
-import algorithms.randomGreedy;
 import models.ExecutionLogger;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import algorithms.genAlg;
 
 
 public class Main {
@@ -35,7 +32,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        Configurador configurator = new Configurador("Practica-2/config-files/config.txt");
+        Configurador configurator = new Configurador("config-files/config.txt");
 
         for (int i = 0; i < configurator.getFiles().size(); i++) {
             String actualFile = configurator.getFiles().get(i);
@@ -49,8 +46,6 @@ public class Main {
             double[][] distanceMatrix = file.getDistanceMatrix();
             int nCities = distanceMatrix.length;
 
-            // soluciones del greedy aleatorio por semilla (una por archivo)
-            Map<Long, randomGreedy> initialSolutions = new HashMap<>();
 
             for (int j = 0; j < configurator.getAlgorithms().size(); j++) {
                 String alg = configurator.getAlgorithms().get(j);
@@ -60,35 +55,39 @@ public class Main {
 
                 try {
                     switch (alg.toLowerCase()) {
-                        case "random_greedy": {
+                        case "gen_alg": {
                             for (int s = 0; s < configurator.getSeeds().size(); s++) {
                                 long seed = configurator.getSeeds().get(s);
-                                if (term) System.out.println("\n--- Ejecutando semilla: " + s + " ---");
 
-                                try (ExecutionLogger log = openLog(configurator, alg,
-                                        base + "_" + alg + "_seed" + seed)) {
-                                    header(log, actualFile, alg, seed, nCities);
+                                for (int c = 0; c < configurator.get_cruces().size(); c++) {
+                                    String cruce = configurator.get_cruces().get(c);
 
-                                    long t0 = System.nanoTime();
-                                    randomGreedy rg = new randomGreedy(distanceMatrix, seed);
-                                    double ms = (System.nanoTime() - t0) / 1_000_000.0;
-                                    String time = String.format(Locale.US, "%.4f", ms);
+                                    for (int e = 0; e < configurator.get_Es().size(); e++) {
+                                        int E = configurator.get_Es().get(e);
 
-                                    initialSolutions.put(seed, rg); // se guarda para local_search
+                                        for (int b = 0; b < configurator.get_kBests().size(); b++) {
+                                            int kBest = configurator.get_kBests().get(b);
 
-                                    if (log != null) {
-                                        log.kv("Ciudad inicial", rg.getInitialCity());
-                                        log.kv("Ruta", ExecutionLogger.route(rg.getRute()));
-                                        log.kv("Coste", rg.getCost());
-                                        log.kv("Tiempo (ms)", time);
-                                    }
-                                    if (term) {
-                                        System.out.println("Coste: " + rg.getCost());
-                                        System.out.println("Tiempo: " + time + " ms");
+                                            for (int w = 0; w < configurator.get_kWorsts().size(); w++) {
+                                                int kWorst = configurator.get_kWorsts().get(w);
+
+                                                try (ExecutionLogger log = openLog(configurator, alg, base + "_" + alg)) {
+                                                    header(log, actualFile, alg, null, nCities);
+
+                                                    genAlg genetico = new genAlg(distanceMatrix, E, kBest, kWorst, cruce, seed);
+
+                                                    if (term) {
+                                                        System.out.println("Tam poblacion: " + genetico.get_tam_poblacion());
+                                                    }
+                                                }
+                                        
+                                            }
+                                        
+                                        }
+                                        
                                     }
                                 }
                             }
-                            break;
                         }
                         default:
                             System.out.println("Algoritmo desconocido: " + alg);
