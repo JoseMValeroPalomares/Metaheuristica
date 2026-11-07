@@ -66,9 +66,14 @@ public class genAlg {
 
         while (!parar()) {
             generacion++;
+
             List<Individuo> elites = calcularElite();
+            
+            List<Individuo> padres = seleccion();
 
-
+            List<Individuo> hijos = cruce(padres);
+            
+            
 
 
         }
@@ -137,7 +142,7 @@ public class genAlg {
             }
         }
  
-        return new Individuo(mejor);
+        return new Individuo(mejor); // Devolvemos una copia
     }
 
     private List<Individuo> seleccion() {
@@ -150,6 +155,73 @@ public class genAlg {
         return padres;
     }
 
+    
+    private ArrayList<Integer> reordenar(ArrayList<Integer> base, List<Integer> seleccionadas) {
+        boolean[] marcada = new boolean[n];
+        for (int c : seleccionadas) marcada[c] = true;
+
+        ArrayList<Integer> hijo = new ArrayList<>(base);
+        int k = 0;
+        for (int i = 0; i < n; i++) {
+            if (marcada[hijo.get(i)]) {
+                hijo.set(i, seleccionadas.get(k));
+                k++;
+            }
+        }
+        return hijo;
+    }
+
+
+    private ArrayList<Integer> hijoOX2(ArrayList<Integer> p1, ArrayList<Integer> p2) {
+        List<Integer> seleccionadas = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (rand.nextDouble() < 0.5) { // cada posición se elige con probabilidad del 50%
+                seleccionadas.add(p1.get(i));
+            }
+        }
+        return reordenar(p2, seleccionadas);
+    }
+
+
+    private Individuo[] OX2(Individuo p1, Individuo p2) {
+        Individuo h1 = new Individuo(hijoOX2(p1.recorrido, p2.recorrido));
+        Individuo h2 = new Individuo(hijoOX2(p2.recorrido, p1.recorrido));
+
+        return new Individuo[] {h1, h2};
+    }
+
+    private Individuo[] MOC(Individuo p1, Individuo p2) {
+        int corte = 1 + rand.nextInt(n - 1); // entre 1 y n-1: ninguna parte queda vacía
+
+        // Parte derecha de cada padre (desde 'corte' hasta el final)
+        List<Integer> derechaP2 = new ArrayList<>(p2.recorrido.subList(corte, n));
+        List<Integer> derechaP1 = new ArrayList<>(p1.recorrido.subList(corte, n));
+
+        Individuo h1 = new Individuo(reordenar(p1.recorrido, derechaP2));
+        Individuo h2 = new Individuo(reordenar(p2.recorrido, derechaP1));
+        return new Individuo[]{ h1, h2 };
+    }
+
+
+    private List<Individuo> cruce(List<Individuo> padres) {
+        List<Individuo> hijos = new ArrayList<>(M);
+
+        for (int i = 0; i < M; i += 2) {
+            Individuo p1 = padres.get(i);
+            Individuo p2 = padres.get(i + 1);
+
+            if (rand.nextDouble() < PC) {
+                Individuo[] h = tipo_cruce.equals("OX2") ? OX2(p1, p2) : MOC(p1, p2);
+                hijos.add(h[0]);
+                hijos.add(h[1]);
+            } else {
+                // No se cruzan, pasan las copias de los padres (ya son copias del torneo)
+                hijos.add(p1);
+                hijos.add(p2);
+            }
+        }
+        return hijos;
+    }
     
 
     private double calculateCost(ArrayList<Integer> sol) {
