@@ -65,9 +65,8 @@ public class genAlg {
         }
 
         while (!parar()) {
-            generacion++;
 
-            List<Individuo> elites = calcularElite();
+            List<Individuo> elite = calcularElite();
             
             List<Individuo> padres = seleccion();
 
@@ -79,8 +78,9 @@ public class genAlg {
                 evaluar(hijos.get(i));
             }
             
-            
+            reemplazar(hijos, elite);
 
+            generacion++;
 
         }
         
@@ -106,19 +106,21 @@ public class genAlg {
         
     }
 
+
     private void evaluar(Individuo ind) {
         if(!ind.evaluado) {
             ind.coste = calculateCost(ind.recorrido);
             ind.evaluado = true;
             n_evaluaciones++;
         }
-        
     }
+
 
     private boolean parar() {
         double segundos = (System.nanoTime() - inicio) / 1e9;
         return n_evaluaciones >= MAX_EVA || segundos >= MAX_SEG;
     }
+
 
     private List<Individuo> calcularElite() {
         List<Individuo> ordenada = new ArrayList<>(poblacion); // copiamos la poblacion para no desordenarla
@@ -131,6 +133,7 @@ public class genAlg {
 
         return elite;
     }
+
 
     private Individuo torneo() {
         List<Individuo> participantes = new ArrayList<>();
@@ -150,6 +153,7 @@ public class genAlg {
  
         return new Individuo(mejor); // Devolvemos una copia
     }
+
 
     private List<Individuo> seleccion() {
         List<Individuo> padres = new ArrayList<>();
@@ -196,6 +200,7 @@ public class genAlg {
         return new Individuo[] {h1, h2};
     }
 
+
     private Individuo[] MOC(Individuo p1, Individuo p2) {
         int corte = 1 + rand.nextInt(n - 1); // entre 1 y n-1: ninguna parte queda vacía
 
@@ -241,6 +246,7 @@ public class genAlg {
         h.evaluado = false;
     }
 
+
     private void mutacion(List<Individuo> hijos) {
         for (Individuo h : hijos) {
             if (rand.nextDouble() < PM) {
@@ -250,7 +256,56 @@ public class genAlg {
     }
 
 
+    private boolean estaEnPoblacion(Individuo e) {
 
+        for (int i = 0; i < M; i++) {
+            if (poblacion.get(i).recorrido == e.recorrido) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    private int posicionNoProtegida(boolean[] protegido) {
+        int pos;
+        do {
+            pos = rand.nextInt(M);
+        } while (protegido[pos]);
+        return pos;
+    }
+
+    private int torneoPerdedores(boolean[] protegido) {
+        // La lista guarda posiciones y no individuos porque, después del torneo, reemplazar necesita saber dónde colocar el élite, y eso lo da la posición
+        List<Integer> participantes = new ArrayList<>();
+        for (int i = 0; i < kWorst; i++) {
+            participantes.add(posicionNoProtegida(protegido));
+        }
+    
+        int peor = participantes.get(0);
+
+        for (int pos : participantes) {
+            if (poblacion.get(pos).coste > poblacion.get(peor).coste) {
+                peor = pos;
+            }
+        }
+
+        return peor;
+    }
+
+    private void reemplazar(List<Individuo> hijos, List<Individuo> elite) {
+        poblacion = hijos;
+        boolean[] protegido = new boolean[M]; // marca las posiciones donde ya se ha colocado un élite. 
+
+        for (int i = 0; i < E; i++) {
+            if (!estaEnPoblacion(elite.get(i))) {
+                int indice = torneoPerdedores(protegido);
+                poblacion.set(indice, new Individuo(elite.get(i)));
+                protegido[indice] = true;
+            }
+        }
+    }
 
 
 
