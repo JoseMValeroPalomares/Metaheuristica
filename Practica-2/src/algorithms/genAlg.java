@@ -73,6 +73,12 @@ public class genAlg {
 
             List<Individuo> hijos = cruce(padres);
             
+            mutacion(hijos);
+
+            for (int i = 0; i < M; i++) {
+                evaluar(hijos.get(i));
+            }
+            
             
 
 
@@ -93,7 +99,7 @@ public class genAlg {
         }
 
         for (int i = nAleatorios; i < M; i++) {
-            randomGreedy rg = new randomGreedy(m_dist, rand, 10);
+            randomGreedy rg = new randomGreedy(m_dist, rand, TAM_LRC);
             Individuo ind = new Individuo(rg.getRute());
             poblacion.add(ind);
         }
@@ -223,6 +229,37 @@ public class genAlg {
         return hijos;
     }
     
+
+    private void mutar(Individuo h) {
+        int i = rand.nextInt(n);
+        int j;
+        do {
+            j = rand.nextInt(n);
+        } while (j == n);
+
+        Collections.swap(h.recorrido, i, j);
+        h.evaluado = false;
+    }
+
+    private void mutacion(List<Individuo> hijos) {
+        for (Individuo h : hijos) {
+            if (rand.nextDouble() < PM) {
+                mutar(h);
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     private double calculateCost(ArrayList<Integer> sol) {
         double cost = 0;
