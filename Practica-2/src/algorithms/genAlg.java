@@ -240,7 +240,7 @@ public class genAlg {
         int j;
         do {
             j = rand.nextInt(n);
-        } while (j == n);
+        } while (j == i);
 
         Collections.swap(h.recorrido, i, j);
         h.evaluado = false;
@@ -259,7 +259,7 @@ public class genAlg {
     private boolean estaEnPoblacion(Individuo e) {
 
         for (int i = 0; i < M; i++) {
-            if (poblacion.get(i).recorrido == e.recorrido) {
+            if (poblacion.get(i).recorrido.equals(e.recorrido)) {
                 return true;
             }
         }
