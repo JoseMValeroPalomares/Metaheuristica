@@ -67,7 +67,8 @@ public class genAlg {
         while (!parar()) {
             generacion++;
             List<Individuo> elites = calcularElite();
-            
+
+
 
 
         }
@@ -119,6 +120,37 @@ public class genAlg {
 
         return elite;
     }
+
+    private Individuo torneo() {
+        List<Individuo> participantes = new ArrayList<>();
+
+        for (int i = 0; i < kBest; i++) {
+            int indice = rand.nextInt(poblacion.size());
+            participantes.add(poblacion.get(indice));
+        }
+
+        Individuo mejor = participantes.get(0);
+
+        for (Individuo p : participantes) {
+            if (p.coste < mejor.coste) {
+                mejor = p;
+            }
+        }
+ 
+        return new Individuo(mejor);
+    }
+
+    private List<Individuo> seleccion() {
+        List<Individuo> padres = new ArrayList<>();
+
+        for (int i = 0; i < M; i++) {
+            padres.add(torneo());
+        }
+
+        return padres;
+    }
+
+    
 
     private double calculateCost(ArrayList<Integer> sol) {
         double cost = 0;
