@@ -12,11 +12,11 @@ public class genAlg {
     // M = 100 (poblacion: 100 individuos) 80% aleatoriamente, 20% greedy aleatorio con una LRC = 10
     // Esquema generacional E = 1,2,3 (E: mejores individuos, con E=2 elijo 2 elites) Guardamos copia de los elites
     // Opeardor de selección: torneo binario con kBest = 2 y kBest = 3 aplicandose tantas veces como individuos tengamos en la población
+    // Operador de cruce: con Pc = 70% se implementan el cruce de orden OX2 y el cruce MOC
+    // Operador de mutación: co Pm = 10% por individuo será el operador 2-opt de la práctica-1
     // Reemplazamiento: Los 100 hijos sustituyen a toda la población. Después comprobamos si hay un hijo con exactamente el mismo recorrido
     //                      - Si lo hay, el elite ha sobrevivido: no se hace nada
     //                      - Si no: elegir kWorst (2 y 3) hijos al azar y el peor se sustituye por el elite
-    // Operador de cruce: con Pc = 70% se implementan el cruce de orden OX2 y el cruce MOC
-    // Operador de mutación: co Pm = 10% por individuo será el operador 2-opt de la práctica-1
     // Condición de parada: número máximo de evaluaciones 50000 o 120 seg.
 
     private int M = 100;
@@ -36,6 +36,7 @@ public class genAlg {
     private int n;
 
     private int n_evaluaciones = 0;
+    private int generacion = 0;
     private List<Individuo> poblacion;
     private long inicio;
 
@@ -61,6 +62,14 @@ public class genAlg {
 
         for (int i = 0; i < M; i++) {
             evaluar(poblacion.get(i));
+        }
+
+        while (!parar()) {
+            generacion++;
+            List<Individuo> elites = calcularElite();
+            
+
+
         }
         
     }
@@ -92,6 +101,23 @@ public class genAlg {
             n_evaluaciones++;
         }
         
+    }
+
+    private boolean parar() {
+        double segundos = (System.nanoTime() - inicio) / 1e9;
+        return n_evaluaciones >= MAX_EVA || segundos >= MAX_SEG;
+    }
+
+    private List<Individuo> calcularElite() {
+        List<Individuo> ordenada = new ArrayList<>(poblacion); // copiamos la poblacion para no desordenarla
+        ordenada.sort((a, b) -> Double.compare(a.coste, b.coste));
+
+        List<Individuo> elite = new ArrayList<>();
+        for (int i = 0; i < E; i++) {
+            elite.add(new Individuo(ordenada.get(i)));
+        }
+
+        return elite;
     }
 
     private double calculateCost(ArrayList<Integer> sol) {
