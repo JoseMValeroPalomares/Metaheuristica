@@ -82,6 +82,9 @@ public class genAlg {
 
             generacion++;
 
+            double mejor = Collections.min(poblacion, (a, b) -> Double.compare(a.coste, b.coste)).coste;
+            System.out.println("Gen " + generacion + " | evals " + n_evaluaciones + " | mejor " + mejor);
+
         }
         
     }

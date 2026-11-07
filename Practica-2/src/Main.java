@@ -76,8 +76,9 @@ public class Main {
 
                                                     genAlg gen_alg = new genAlg(distanceMatrix, E, kBest, kWorst, cruce, seed);
 
+                                                    gen_alg.ejecutar();
+
                                                     if (term) {
-                                                        gen_alg.ejecutar();
                                                         gen_alg.mostrarPoblacion();
                                                     }
                                                 }
