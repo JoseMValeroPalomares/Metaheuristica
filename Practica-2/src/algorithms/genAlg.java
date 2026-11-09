@@ -333,12 +333,17 @@ public class genAlg {
 
 
     public void mostrarPoblacion() {
+        Individuo mejor = calcularElite().get(0);
         System.out.println("Cruce=" + tipo_cruce + 
         " M=" + poblacion.size() +
         " E=" + E +
         " kBest=" + kBest +
         " kWorst=" + kWorst +
-        " seed=" + seed
+        " seed=" + seed +
+        " | Generaciones=" + generacion +
+        " Evaluaciones=" + n_evaluaciones +
+        " Mejor-coste=" + String.format("%.2f", mejor.coste) + 
+        " Tiempo=" + String.format("%.3f", segundos()) + "s"
         );
     }
 
