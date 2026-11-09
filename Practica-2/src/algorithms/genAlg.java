@@ -337,7 +337,8 @@ public class genAlg {
         " M=" + poblacion.size() +
         " E=" + E +
         " kBest=" + kBest +
-        " kWorst=" + kWorst
+        " kWorst=" + kWorst +
+        " seed=" + seed
         );
     }
 
