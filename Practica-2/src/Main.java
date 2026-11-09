@@ -83,7 +83,10 @@ public class Main {
                                                         log.line("");
                                                     }
 
-                                                    genAlg gen_alg = new genAlg(distanceMatrix, E, kBest, kWorst, cruce, seed);
+                                                    genAlg gen_alg = new genAlg(distanceMatrix, E, kBest, kWorst, cruce, seed, configurator.getMs().get(0), 
+                                                                                configurator.getporcAlea().get(0), configurator.gettamLRCs().get(0), 
+                                                                                configurator.getPCs().get(0), configurator.getPMs().get(0), 
+                                                                                configurator.getmaxEvas().get(0), configurator.getmaxSegs().get(0));
                                                     gen_alg.setLogger(log); 
                                                     gen_alg.ejecutar();
 

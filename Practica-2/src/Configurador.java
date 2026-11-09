@@ -16,6 +16,13 @@ public class Configurador {
     ArrayList<Integer> Es;
     ArrayList<Integer> kBests;
     ArrayList<Integer> kWorsts;
+    ArrayList<Integer> Ms;
+    ArrayList<Double> porcAlea;
+    ArrayList<Integer> tamLRCs;
+    ArrayList<Double> PCs;
+    ArrayList<Double> PMs;
+    ArrayList<Integer> maxEvas;
+    ArrayList<Double> maxSegs;
 
     public Configurador(String rute) {
         files = new ArrayList<>();
@@ -27,6 +34,13 @@ public class Configurador {
         Es = new ArrayList<>();
         kBests = new ArrayList<>();
         kWorsts = new ArrayList<>();
+        Ms = new ArrayList<>();
+        porcAlea = new ArrayList<>();
+        tamLRCs = new ArrayList<>();
+        PCs = new ArrayList<>();
+        PMs = new ArrayList<>();
+        maxEvas = new ArrayList<>();
+        maxSegs = new ArrayList<>();
         String line;
         FileReader f = null;
         
@@ -91,9 +105,51 @@ public class Configurador {
                             kWorsts.add(Integer.parseInt(vkWorsts[i]));
                         }
                         break;
+                    case "M":
+                        String[] vMs = split[1].split(" ");
+                        for (int i = 0; i < vMs.length; i++) {
+                            Ms.add(Integer.parseInt(vMs[i]));  
+                        }
+                        break;
+                    case "porcAlea":
+                        String[] vPorcAlea = split[1].split(" ");
+                        for (int i = 0; i < vPorcAlea.length; i++) {
+                            porcAlea.add(Double.parseDouble(vPorcAlea[i]));
+                        }
+                        break;
+                    case "tamLRC":
+                        String[] vTamLRC = split[1].split(" ");
+                        for (int i = 0; i < vTamLRC.length; i++) {
+                            tamLRCs.add(Integer.parseInt(vTamLRC[i]));
+                        }
+                        break;
+                    case "PC":
+                        String[] vPCs = split[1].split(" ");
+                        for (int i = 0; i < vPCs.length; i++) {
+                            PCs.add(Double.parseDouble(vPCs[i]));
+                        }
+                        break;
+                    case "PM":
+                        String[] vPMs = split[1].split(" ");
+                        for (int i = 0; i < vPMs.length; i++) {
+                            PMs.add(Double.parseDouble(vPMs[i]));
+                        }
+                        break;
+                    case "maxEva":
+                        String[] vMaxEvas = split[1].split(" ");
+                        for (int i = 0; i < vMaxEvas.length; i++) {
+                            maxEvas.add(Integer.parseInt(vMaxEvas[i]));
+                        }
+                        break;
+                    case "maxSeg":
+                        String[] vMaxSegs = split[1].split(" ");
+                        for (int i = 0; i < vMaxSegs.length; i++) {
+                            maxSegs.add(Double.parseDouble(vMaxSegs[i]));
+                        }
+                        break;
+
                 }
             }
-
             b.close();
 
         } catch (IOException e) {
@@ -138,5 +194,32 @@ public class Configurador {
         return terminalAlgorithms.contains("all") || terminalAlgorithms.contains(alg.toLowerCase());
     }
 
+    public ArrayList<Integer> getMs() {
+        return Ms;
+    }  
+
+    public ArrayList<Double> getporcAlea() {
+        return porcAlea;
+    }
+
+    public ArrayList<Integer> gettamLRCs() {
+        return tamLRCs;
+    }
+
+    public ArrayList<Double> getPCs() {
+        return PCs;
+    }
+
+    public ArrayList<Double> getPMs() {
+        return PMs;
+    }
+
+    public ArrayList<Integer> getmaxEvas() {
+        return maxEvas;
+    }
+
+    public ArrayList<Double> getmaxSegs() {
+        return maxSegs;
+    }
 
 } 

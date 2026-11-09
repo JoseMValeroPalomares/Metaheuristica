@@ -20,13 +20,13 @@ public class genAlg {
     //                      - Si no: elegir kWorst (2 y 3) hijos al azar y el peor se sustituye por el elite
     // Condición de parada: número máximo de evaluaciones 50000 o 120 seg.
 
-    private int M = 100;
-    private double PORC_ALEA = 0.8;
-    private int TAM_LRC = 10;
-    private double PC = 0.7;
-    private double PM = 0.1;
-    private int MAX_EVA = 50000;
-    private double MAX_SEG = 120.0;
+    private int M;
+    private double PORC_ALEA;
+    private int TAM_LRC;
+    private double PC;
+    private double PM;
+    private int MAX_EVA;
+    private double MAX_SEG;
 
     private int E, kBest,  kWorst;
     private String tipo_cruce;
@@ -43,7 +43,7 @@ public class genAlg {
 
     private ExecutionLogger log;
 
-    public genAlg(double[][] m_dist, int E, int kBest, int kWorst, String tipo_cruce, long seed) {
+    public genAlg(double[][] m_dist, int E, int kBest, int kWorst, String tipo_cruce, long seed, int M, double PORC_ALEA, int TAM_LRC, double PC, double PM, int MAX_EVA, double MAX_SEG) {
         this.m_dist = m_dist;
         this.n = m_dist.length;
         this.E = E;
@@ -53,6 +53,13 @@ public class genAlg {
         this.seed = seed;
         this.poblacion = new ArrayList<>(M);
         this.rand = new Random(this.seed);
+        this.M = M;
+        this.PORC_ALEA = PORC_ALEA;
+        this.TAM_LRC = TAM_LRC;
+        this.PC = PC;
+        this.PM = PM;
+        this.MAX_EVA = MAX_EVA;
+        this.MAX_SEG = MAX_SEG;
     }
 
 
