@@ -379,8 +379,8 @@ public class genAlg {
                 generacion, n_evaluaciones, segundos()));
         for (int i = 0; i < elite.size(); i++) {
             Individuo e = elite.get(i);
-            log.line(String.format("   elite %d: coste=%.2f recorrido=%s",
-                    i + 1, e.coste, e.recorrido));
+            log.line(String.format("   elite %d: coste=%.2f",
+                    i + 1, e.coste));
         }
     }
 
