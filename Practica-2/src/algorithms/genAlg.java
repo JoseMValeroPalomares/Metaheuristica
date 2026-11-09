@@ -231,7 +231,7 @@ public class genAlg {
             Individuo p2 = padres.get(i + 1);
 
             if (rand.nextDouble() < PC) {
-                Individuo[] h = tipo_cruce.equals("OX2") ? OX2(p1, p2) : MOC(p1, p2);
+                Individuo[] h = tipo_cruce.equalsIgnoreCase("OX2") ? OX2(p1, p2) : MOC(p1, p2);
                 hijos.add(h[0]);
                 hijos.add(h[1]);
             } else {
