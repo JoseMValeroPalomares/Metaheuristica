@@ -6,7 +6,7 @@ import algorithms.genAlg;
 
 public class Main {
 
-    private static final String LOG_DIR = "Practica-2/logs";
+    private static final String LOG_DIR = "logs";
 
     private static String baseName(String path) {
         String f = Paths.get(path).getFileName().toString();
