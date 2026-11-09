@@ -71,11 +71,20 @@ public class Main {
                                             for (int w = 0; w < configurator.get_kWorsts().size(); w++) {
                                                 int kWorst = configurator.get_kWorsts().get(w);
 
-                                                try (ExecutionLogger log = openLog(configurator, alg, base + "_" + alg)) {
+                                                String nombreLog = base + "_GEN_" + cruce + "_E" + E
+                                                                + "_kB" + kBest + "_kW" + kWorst + "_s" + seed;
+
+                                                try (ExecutionLogger log = openLog(configurator, alg, nombreLog)) {
                                                     header(log, actualFile, alg, null, nCities);
 
-                                                    genAlg gen_alg = new genAlg(distanceMatrix, E, kBest, kWorst, cruce, seed);
+                                                    if (log != null) {
+                                                        log.kv("Configuracion", "Cruce=" + cruce + " M=100 E=" + E
+                                                                            + " kBest=" + kBest + " kWorst=" + kWorst);
+                                                        log.line("");
+                                                    }
 
+                                                    genAlg gen_alg = new genAlg(distanceMatrix, E, kBest, kWorst, cruce, seed);
+                                                    gen_alg.setLogger(log); 
                                                     gen_alg.ejecutar();
 
                                                     if (term) {

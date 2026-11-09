@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.Collections;
 
 import models.Individuo;
+import models.ExecutionLogger;
 
 public class genAlg {
     
@@ -40,9 +41,9 @@ public class genAlg {
     private List<Individuo> poblacion;
     private long inicio;
 
+    private ExecutionLogger log;
 
     public genAlg(double[][] m_dist, int E, int kBest, int kWorst, String tipo_cruce, long seed) {
-
         this.m_dist = m_dist;
         this.n = m_dist.length;
         this.E = E;
@@ -54,6 +55,7 @@ public class genAlg {
         this.rand = new Random(this.seed);
     }
 
+
     public void ejecutar() {
 
         inicio = System.nanoTime();
@@ -63,6 +65,8 @@ public class genAlg {
         for (int i = 0; i < M; i++) {
             evaluar(poblacion.get(i));
         }
+
+        logPoblacionInicial(); 
 
         while (!parar()) {
 
@@ -82,12 +86,14 @@ public class genAlg {
 
             generacion++;
 
-            double mejor = Collections.min(poblacion, (a, b) -> Double.compare(a.coste, b.coste)).coste;
-            System.out.println("Gen " + generacion + " | evals " + n_evaluaciones + " | mejor " + mejor);
+            logElite();
 
         }
+
+        logResumen();
         
     }
+
 
     private void inicializar() {
         int nAleatorios = (int) Math.round(M * PORC_ALEA);
@@ -260,7 +266,6 @@ public class genAlg {
 
 
     private boolean estaEnPoblacion(Individuo e) {
-
         for (int i = 0; i < M; i++) {
             if (poblacion.get(i).recorrido.equals(e.recorrido)) {
                 return true;
@@ -278,6 +283,7 @@ public class genAlg {
         } while (protegido[pos]);
         return pos;
     }
+
 
     private int torneoPerdedores(boolean[] protegido) {
         // La lista guarda posiciones y no individuos porque, después del torneo, reemplazar necesita saber dónde colocar el élite, y eso lo da la posición
@@ -297,6 +303,7 @@ public class genAlg {
         return peor;
     }
 
+
     private void reemplazar(List<Individuo> hijos, List<Individuo> elite) {
         poblacion = hijos;
         boolean[] protegido = new boolean[M]; // marca las posiciones donde ya se ha colocado un élite. 
@@ -311,14 +318,6 @@ public class genAlg {
     }
 
 
-
-
-
-
-
-
-
-
     private double calculateCost(ArrayList<Integer> sol) {
         double cost = 0;
         for (int i = 0; i < sol.size(); i++) {
@@ -327,9 +326,11 @@ public class genAlg {
         return cost;
     }
 
+
     public int get_tam_poblacion() {
         return poblacion.size();
     }
+
 
     public void mostrarPoblacion() {
         System.out.println("Cruce=" + tipo_cruce + 
@@ -338,5 +339,62 @@ public class genAlg {
         " kBest=" + kBest +
         " kWorst=" + kWorst
         );
+    }
+
+
+    // Métodos para el log
+
+    public void setLogger(ExecutionLogger log) {
+        this.log = log;
+    }
+
+
+    private double segundos() {
+        return (System.nanoTime() - inicio) / 1e9;
+    }
+
+
+    /** Generación 0: toda la población. */
+    private void logPoblacionInicial() {
+        if (log == null) return;
+        int nAleatorios = (int) Math.round(M * PORC_ALEA);
+
+        log.section("POBLACION INICIAL (generacion 0)");
+        for (int i = 0; i < poblacion.size(); i++) {
+            Individuo ind = poblacion.get(i);
+            String tipo = (i < nAleatorios) ? "aleatorio" : "greedy";
+            log.line(String.format("[%3d] %-9s coste=%.2f recorrido=%s",
+                    i, tipo, ind.coste, ind.recorrido));
+        }
+        log.line("");
+    }
+
+
+    /** Resto de generaciones: solo el élite. */
+    private void logElite() {
+        if (log == null) return;
+        List<Individuo> elite = calcularElite();
+
+        log.line(String.format("Gen %d | evals %d | t=%.3fs",
+                generacion, n_evaluaciones, segundos()));
+        for (int i = 0; i < elite.size(); i++) {
+            Individuo e = elite.get(i);
+            log.line(String.format("   elite %d: coste=%.2f recorrido=%s",
+                    i + 1, e.coste, e.recorrido));
+        }
+    }
+
+
+    /** Resumen final. */
+    private void logResumen() {
+        if (log == null) return;
+        Individuo mejor = calcularElite().get(0);
+
+        log.section("RESULTADO FINAL");
+        log.kv("Generaciones", generacion);
+        log.kv("Evaluaciones", n_evaluaciones);
+        log.kv("Tiempo (s)", String.format("%.3f", segundos()));
+        log.kv("Mejor coste", String.format("%.2f", mejor.coste));
+        log.kv("Mejor recorrido", mejor.recorrido);
     }
 }

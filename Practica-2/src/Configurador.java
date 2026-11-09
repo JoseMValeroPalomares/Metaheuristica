@@ -131,7 +131,7 @@ public class Configurador {
     }
 
     public boolean toLog(String alg) {
-    return logAlgorithms.contains("all") || logAlgorithms.contains(alg.toLowerCase());
+        return logAlgorithms.contains("all") || logAlgorithms.contains(alg.toLowerCase());
     }
 
     public boolean toTerminal(String alg) {
