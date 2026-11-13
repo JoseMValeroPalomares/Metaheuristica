@@ -15,7 +15,7 @@ public class genAlg {
     // Opeardor de selección: torneo binario con kBest = 2 y kBest = 3 aplicandose tantas veces como individuos tengamos en la población
     // Operador de cruce: con Pc = 70% se implementan el cruce de orden OX2 y el cruce MOC
     // Operador de mutación: co Pm = 10% por individuo será el operador 2-opt de la práctica-1
-    // Reemplazamiento: Los 100 hijos sustituyen a toda la población. Después comprobamos si hay un hijo con exactamente el mismo recorrido
+    // Reemplazamiento: Los 100 hijos sustituyen a toda la población. Después comprobamos si hay un hijo con el mismo coste
     //                      - Si lo hay, el elite ha sobrevivido: no se hace nada
     //                      - Si no: elegir kWorst (2 y 3) hijos al azar y el peor se sustituye por el elite
     // Condición de parada: número máximo de evaluaciones 50000 o 120 seg.
@@ -274,7 +274,7 @@ public class genAlg {
 
     private boolean estaEnPoblacion(Individuo e) {
         for (int i = 0; i < M; i++) {
-            if (poblacion.get(i).recorrido.equals(e.recorrido)) {
+            if (Math.abs(poblacion.get(i).coste - e.coste) < 1e-6) {
                 return true;
             }
         }
