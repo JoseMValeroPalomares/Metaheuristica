@@ -14,7 +14,7 @@ public class genAlg {
     // Esquema generacional E = 1,2,3 (E: mejores individuos, con E=2 elijo 2 elites) Guardamos copia de los elites
     // Opeardor de selección: torneo binario con kBest = 2 y kBest = 3 aplicandose tantas veces como individuos tengamos en la población
     // Operador de cruce: con Pc = 70% se implementan el cruce de orden OX2 y el cruce MOC
-    // Operador de mutación: co Pm = 10% por individuo será el operador 2-opt de la práctica-1
+    // Operador de mutación: co Pm = 10% por individuo será el operador 2-opt de la práctica-1 (un swap de dos ciudades)
     // Reemplazamiento: Los 100 hijos sustituyen a toda la población. Después comprobamos si hay un hijo con el mismo coste
     //                      - Si lo hay, el elite ha sobrevivido: no se hace nada
     //                      - Si no: elegir kWorst (2 y 3) hijos al azar y el peor se sustituye por el elite
@@ -43,6 +43,23 @@ public class genAlg {
 
     private ExecutionLogger log;
 
+    /**
+     * Crea un algoritmo genético generacional con élite para el TSP.
+     *
+     * @param m_dist     matriz de distancias entre ciudades (n x n)
+     * @param E          número de individuos élite que se conservan entre generaciones
+     * @param kBest      tamaño del torneo de selección de padres (a mayor k, mayor presión selectiva)
+     * @param kWorst     tamaño del torneo de perdedores usado para decidir qué hijo sustituye el élite
+     * @param tipo_cruce operador de cruce a usar: "OX2" o "MOC"
+     * @param seed       semilla del generador aleatorio (permite repetir ejecuciones)
+     * @param M          tamaño de la población (debe ser par, el cruce trabaja por parejas)
+     * @param PORC_ALEA  proporción de la población inicial generada aleatoriamente (el resto con greedy aleatorio)
+     * @param TAM_LRC    tamaño de la lista restringida de candidatos del greedy aleatorio
+     * @param PC         probabilidad de cruce por pareja de padres
+     * @param PM         probabilidad de mutación por individuo
+     * @param MAX_EVA    número máximo de evaluaciones de la función objetivo
+     * @param MAX_SEG    tiempo máximo de ejecución en segundos
+     */
     public genAlg(double[][] m_dist, int E, int kBest, int kWorst, String tipo_cruce, long seed, int M, double PORC_ALEA, int TAM_LRC, double PC, double PM, int MAX_EVA, double MAX_SEG) {
         this.m_dist = m_dist;
         this.n = m_dist.length;
@@ -63,6 +80,12 @@ public class genAlg {
     }
 
 
+    /**
+     * Bucle principal del esquema generacional con élite.
+     * Inicializa y evalúa P(0). Mientras no se cumpla la condición de parada:
+     * calcula el élite de P(t), selecciona los padres P'(t), aplica cruce y mutación
+     * para obtener los hijos Q(t), los evalúa y reemplaza P(t) por Q(t) reinsertando el élite si no ha sobrevivido.
+     */
     public void ejecutar() {
 
         inicio = System.nanoTime();
@@ -102,6 +125,12 @@ public class genAlg {
     }
 
 
+    /**
+     * Genera la población inicial P(0) de M individuos.
+     * Una proporción PORC_ALEA son permutaciones aleatorias de las ciudades
+     * y el resto se construye con un greedy aleatorio con LRC de tamaño TAM_LRC.
+     * Los individuos se crean sin evaluar.
+     */
     private void inicializar() {
         int nAleatorios = (int) Math.round(M * PORC_ALEA);
 
@@ -123,6 +152,14 @@ public class genAlg {
     }
 
 
+    /**
+     * Calcula el fitness (coste del recorrido) de un individuo si aún no lo tiene.
+     * Solo cuenta como evaluación cuando realmente se calcula: los individuos
+     * copiados sin cambios (padres que no se cruzan ni mutan) conservan su coste
+     * y no consumen evaluaciones.
+     *
+     * @param ind individuo a evaluar
+     */
     private void evaluar(Individuo ind) {
         if(!ind.evaluado) {
             ind.coste = calculateCost(ind.recorrido);
@@ -132,12 +169,25 @@ public class genAlg {
     }
 
 
+    /**
+     * Condición de parada: se alcanza el máximo de evaluaciones (MAX_EVA)
+     * o el tiempo máximo de ejecución (MAX_SEG), lo que ocurra antes.
+     *
+     * @return true si el algoritmo debe detenerse
+     */
     private boolean parar() {
         double segundos = (System.nanoTime() - inicio) / 1e9;
         return n_evaluaciones >= MAX_EVA || segundos >= MAX_SEG;
     }
 
 
+    /**
+     * Obtiene los E mejores individuos (menor coste) de la población actual P(t).
+     * Se devuelven copias para que no les afecten los cambios posteriores de la
+     * población (cruce, mutación y reemplazo).
+     *
+     * @return lista con copias de los E individuos élite, ordenados de mejor a peor
+     */
     private List<Individuo> calcularElite() {
         List<Individuo> ordenada = new ArrayList<>(poblacion); // copiamos la poblacion para no desordenarla
         ordenada.sort((a, b) -> Double.compare(a.coste, b.coste));
@@ -151,6 +201,13 @@ public class genAlg {
     }
 
 
+    /**
+     * Selección por torneo: escoge aleatoriamente kBest individuos de la población
+     * (con reemplazamiento, puede repetirse alguno) y se queda con el de mejor
+     * fitness, es decir, el de menor coste.
+     *
+     * @return copia del individuo ganador del torneo
+     */
     private Individuo torneo() {
         List<Individuo> participantes = new ArrayList<>();
 
@@ -171,6 +228,11 @@ public class genAlg {
     }
 
 
+    /**
+     * Construye la población de padres P'(t) repitiendo el torneo M veces.
+     *
+     * @return lista de M padres (copias de individuos de P(t))
+     */
     private List<Individuo> seleccion() {
         List<Individuo> padres = new ArrayList<>();
 
@@ -182,6 +244,17 @@ public class genAlg {
     }
 
     
+    /**
+     * Operación común a OX2 y MOC: copia el recorrido base y, en las posiciones
+     * donde aparece alguna de las ciudades seleccionadas, las vuelve a colocar
+     * en el orden en que vienen en la lista de seleccionadas. El resto de
+     * ciudades se queda en su posición, por lo que el hijo siempre es una
+     * permutación válida.
+     *
+     * @param base         recorrido del que se copian las posiciones fijas
+     * @param seleccionadas ciudades a recolocar, en el orden que deben aparecer
+     * @return nuevo recorrido hijo
+     */
     private ArrayList<Integer> reordenar(ArrayList<Integer> base, List<Integer> seleccionadas) {
         boolean[] marcada = new boolean[n];
         for (int c : seleccionadas) marcada[c] = true;
@@ -198,6 +271,15 @@ public class genAlg {
     }
 
 
+    /**
+     * Genera un hijo con el cruce OX2: se eligen al azar (50%) posiciones de p1,
+     * se localizan esas ciudades en p2 y se rellenan esos huecos con el orden
+     * que tienen en p1. El resto de ciudades conserva la posición de p2.
+     *
+     * @param p1 padre del que se toma el orden de las ciudades seleccionadas
+     * @param p2 padre que aporta la estructura del hijo
+     * @return recorrido del hijo
+     */
     private ArrayList<Integer> hijoOX2(ArrayList<Integer> p1, ArrayList<Integer> p2) {
         List<Integer> seleccionadas = new ArrayList<>();
         for (int i = 0; i < n; i++) {
@@ -209,6 +291,14 @@ public class genAlg {
     }
 
 
+    /**
+     * Cruce OX2 (order-based crossover): produce dos hijos intercambiando
+     * el papel de cada padre.
+     *
+     * @param p1 primer padre
+     * @param p2 segundo padre
+     * @return array con los dos hijos (sin evaluar)
+     */
     private Individuo[] OX2(Individuo p1, Individuo p2) {
         Individuo h1 = new Individuo(hijoOX2(p1.recorrido, p2.recorrido));
         Individuo h2 = new Individuo(hijoOX2(p2.recorrido, p1.recorrido));
@@ -217,6 +307,16 @@ public class genAlg {
     }
 
 
+    /**
+     * Cruce MOC (Modified Order Crossover): se elige un punto de corte aleatorio.
+     * El hijo 1 mantiene la estructura de p1 pero las ciudades que están a la
+     * derecha del corte en p2 se recolocan en p1 con el orden de p2. El hijo 2
+     * se obtiene igual cambiando los papeles de los padres.
+     *
+     * @param p1 primer padre
+     * @param p2 segundo padre
+     * @return array con los dos hijos (sin evaluar)
+     */
     private Individuo[] MOC(Individuo p1, Individuo p2) {
         int corte = 1 + rand.nextInt(n - 1); // entre 1 y n-1: ninguna parte queda vacía
 
@@ -230,6 +330,15 @@ public class genAlg {
     }
 
 
+    /**
+     * Recombina P'(t) para obtener P''(t). Los padres se emparejan de forma
+     * consecutiva (0-1, 2-3, ...) y cada pareja se cruza con probabilidad PC
+     * usando el operador indicado en tipo_cruce. Si no se cruzan, pasan
+     * los padres tal cual (conservando su coste ya evaluado).
+     *
+     * @param padres población de padres P'(t), de tamaño M (par)
+     * @return lista de M hijos
+     */
     private List<Individuo> cruce(List<Individuo> padres) {
         List<Individuo> hijos = new ArrayList<>(M);
 
@@ -251,6 +360,12 @@ public class genAlg {
     }
     
 
+    /**
+     * Operador de mutación: intercambia dos ciudades distintas elegidas al azar
+     * y marca el individuo como no evaluado, ya que su coste ha cambiado.
+     *
+     * @param h individuo a mutar (se modifica directamente)
+     */
     private void mutar(Individuo h) {
         int i = rand.nextInt(n);
         int j;
@@ -263,6 +378,11 @@ public class genAlg {
     }
 
 
+    /**
+     * Aplica la mutación a cada hijo con probabilidad PM, obteniendo Q(t).
+     *
+     * @param hijos hijos tras el cruce, P''(t) (se modifican directamente)
+     */
     private void mutacion(List<Individuo> hijos) {
         for (Individuo h : hijos) {
             if (rand.nextDouble() < PM) {
@@ -272,6 +392,15 @@ public class genAlg {
     }
 
 
+    /**
+     * Comprueba si un élite ha sobrevivido en la nueva población comparando su
+     * fitness (con tolerancia 1e-6) en lugar del recorrido completo: cuesta O(M)
+     * en vez de O(M·n) y además detecta recorridos rotados o invertidos, que en
+     * el TSP representan la misma solución.
+     *
+     * @param e individuo élite a buscar
+     * @return true si algún individuo de la población tiene el mismo coste
+     */
     private boolean estaEnPoblacion(Individuo e) {
         for (int i = 0; i < M; i++) {
             if (Math.abs(poblacion.get(i).coste - e.coste) < 1e-6) {
@@ -283,6 +412,15 @@ public class genAlg {
     }
 
 
+    /**
+     * Elige al azar una posición de la población que no esté protegida, es decir,
+     * donde todavía no se haya colocado un élite en esta generación. Así se evita
+     * que un élite recién insertado sea sustituido por otro. Siempre termina
+     * porque hay como mucho E posiciones protegidas y E es menor que M.
+     *
+     * @param protegido posiciones donde ya se ha insertado un élite
+     * @return índice de una posición no protegida
+     */
     private int posicionNoProtegida(boolean[] protegido) {
         int pos;
         do {
@@ -292,6 +430,14 @@ public class genAlg {
     }
 
 
+    /**
+     * Torneo inverso para el reemplazo: elige kWorst posiciones al azar entre las
+     * no protegidas y devuelve la del individuo de peor fitness (mayor coste),
+     * que será sustituido por un élite.
+     *
+     * @param protegido posiciones donde ya se ha insertado un élite y no pueden elegirse
+     * @return posición en la población del individuo perdedor
+     */
     private int torneoPerdedores(boolean[] protegido) {
         // La lista guarda posiciones y no individuos porque, después del torneo, reemplazar necesita saber dónde colocar el élite, y eso lo da la posición
         List<Integer> participantes = new ArrayList<>();
@@ -311,9 +457,18 @@ public class genAlg {
     }
 
 
+    /**
+     * Reemplazamiento generacional con élite: los hijos Q(t) sustituyen a toda
+     * la población y forman P(t+1). Después, cada élite de P(t) que no esté
+     * en Q(t) se reinserta en el lugar del perdedor de un torneo de kWorst
+     * individuos, para no perder la mejor solución encontrada.
+     *
+     * @param hijos nueva generación Q(t), ya evaluada
+     * @param elite copias de los E mejores individuos de P(t)
+     */
     private void reemplazar(List<Individuo> hijos, List<Individuo> elite) {
         poblacion = hijos;
-        boolean[] protegido = new boolean[M]; // marca las posiciones donde ya se ha colocado un élite. 
+        boolean[] protegido = new boolean[M];
 
         for (int i = 0; i < E; i++) {
             if (!estaEnPoblacion(elite.get(i))) {
@@ -325,6 +480,14 @@ public class genAlg {
     }
 
 
+    /**
+     * Función objetivo (fitness) del TSP: longitud total del ciclo, sumando
+     * la distancia entre ciudades consecutivas más la vuelta de la última a
+     * la primera. Se busca minimizarla.
+     *
+     * @param sol recorrido como permutación de las ciudades
+     * @return coste total del recorrido
+     */
     private double calculateCost(ArrayList<Integer> sol) {
         double cost = 0;
         for (int i = 0; i < sol.size(); i++) {
@@ -355,8 +518,9 @@ public class genAlg {
     }
 
 
-    // Métodos para el log
+    // ---- MÉTODOS PARA EL LOG ----
 
+    
     public void setLogger(ExecutionLogger log) {
         this.log = log;
     }
