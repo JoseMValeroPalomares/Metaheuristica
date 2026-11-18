@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import models.pairVector;
 import java.util.Random;
 
-public class randomGreedy extends greedy {
+public class randomGreedy_Clase01_Grupo02 extends greedy_Clase01_Grupo02 {
 
     private Random rand;
     private int K;
 
-    public randomGreedy(double[][] matrix, Random rand, int K) {
+    public randomGreedy_Clase01_Grupo02(double[][] matrix, Random rand, int K) {
         super(matrix, false); // Llamar al constructor del padre.
         this.rand = rand;
         this.K = K;

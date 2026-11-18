@@ -1,7 +1,8 @@
 import models.ExecutionLogger;
 import java.io.IOException;
 import java.nio.file.Paths;
-import algorithms.genAlg;
+
+import algorithms.AlgGenetico_Clase01_Grupo02;
 
 
 public class Main {
@@ -83,7 +84,7 @@ public class Main {
                                                         log.line("");
                                                     }
 
-                                                    genAlg gen_alg = new genAlg(distanceMatrix, E, kBest, kWorst, cruce, seed, configurator.getMs().get(0), 
+                                                    AlgGenetico_Clase01_Grupo02 gen_alg = new AlgGenetico_Clase01_Grupo02(distanceMatrix, E, kBest, kWorst, cruce, seed, configurator.getMs().get(0), 
                                                                                 configurator.getporcAlea().get(0), configurator.gettamLRCs().get(0), 
                                                                                 configurator.getPCs().get(0), configurator.getPMs().get(0), 
                                                                                 configurator.getmaxEvas().get(0), configurator.getmaxSegs().get(0));

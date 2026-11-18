@@ -8,7 +8,7 @@ import java.util.Collections;
 import models.Individuo;
 import models.ExecutionLogger;
 
-public class genAlg {
+public class AlgGenetico_Clase01_Grupo02 {
     
     // M = 100 (poblacion: 100 individuos) 80% aleatoriamente, 20% greedy aleatorio con una LRC = 10
     // Esquema generacional E = 1,2,3 (E: mejores individuos, con E=2 elijo 2 elites) Guardamos copia de los elites
@@ -60,7 +60,7 @@ public class genAlg {
      * @param MAX_EVA    número máximo de evaluaciones de la función objetivo
      * @param MAX_SEG    tiempo máximo de ejecución en segundos
      */
-    public genAlg(double[][] m_dist, int E, int kBest, int kWorst, String tipo_cruce, long seed, int M, double PORC_ALEA, int TAM_LRC, double PC, double PM, int MAX_EVA, double MAX_SEG) {
+    public AlgGenetico_Clase01_Grupo02(double[][] m_dist, int E, int kBest, int kWorst, String tipo_cruce, long seed, int M, double PORC_ALEA, int TAM_LRC, double PC, double PM, int MAX_EVA, double MAX_SEG) {
         this.m_dist = m_dist;
         this.n = m_dist.length;
         this.E = E;
@@ -144,7 +144,7 @@ public class genAlg {
         }
 
         for (int i = nAleatorios; i < M; i++) {
-            randomGreedy rg = new randomGreedy(m_dist, rand, TAM_LRC);
+            randomGreedy_Clase01_Grupo02 rg = new randomGreedy_Clase01_Grupo02(m_dist, rand, TAM_LRC);
             Individuo ind = new Individuo(rg.getRute());
             poblacion.add(ind);
         }

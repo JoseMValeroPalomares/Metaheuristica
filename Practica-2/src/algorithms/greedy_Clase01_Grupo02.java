@@ -5,7 +5,7 @@ import java.util.Comparator;
 import models.pairVector;
 
 
-public class greedy {
+public class greedy_Clase01_Grupo02 {
     
     protected double[][] matrix;
     protected int n; // longitud
@@ -13,11 +13,11 @@ public class greedy {
     protected int initialCity;
     protected ArrayList<Integer> greedyRute; // solucion
 
-    public greedy(double[][] matrix) {
+    public greedy_Clase01_Grupo02(double[][] matrix) {
         this(matrix, true);
     }
 
-    public greedy(double[][] matrix, boolean runExecution) {
+    public greedy_Clase01_Grupo02(double[][] matrix, boolean runExecution) {
         this.matrix = matrix;
         this.n = matrix.length;
         this.sumCities = new ArrayList<>();
